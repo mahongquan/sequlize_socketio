@@ -38,8 +38,8 @@ class PackItemEditNew extends Component{
     this.setState({packitem:this.old});
   }
   handleSave=(data)=>{
-    var url="/rest/BothPackItem";
-    Client.postOrPut(url,this.state.packitem,(res) => {
+    var url="/PackItemEx";
+    Client.put(url,this.state.packitem,(res) => {
         this.setState({contact:res.data});
         this.parent.handlePackItemChange(this.index,res.data);
         this.old=res.data;
@@ -86,6 +86,10 @@ class PackItemEditNew extends Component{
     this.setState({packitem:contact2});
   }
   render=()=>{
+    let item={};
+    if(this.state.packitem.Item){
+      item=this.state.packitem.Item;
+    }
     return (
         <Modal show={this.state.showModal} onHide={this.close}>
           <Modal.Header closeButton>
@@ -106,23 +110,33 @@ class PackItemEditNew extends Component{
                     名称:
                 </td>
                 <td>
-                    <input  style={{"backgroundColor":this.state.bg.addr}}  type="text" id="addr" name="name" value={this.state.packitem.name} onChange={this.handleChange} />
+                    <input  style={{"backgroundColor":this.state.bg.addr}}  type="text" id="addr" name="name" value={item.name} onChange={this.handleChange} />
                 </td>
             </tr><tr>
                 <td>
                     <label>规格:</label>
                 </td>
                 <td>
-                    <input style={{"backgroundColor":this.state.bg.yiqixinghao}} type="text"  name="guige" value={this.state.packitem.guige}  onChange={this.handleChange} />
+                    <input style={{"backgroundColor":this.state.bg.yiqixinghao}} type="text"  name="guige" value={item.guige}  onChange={this.handleChange} />
                 </td>
-            </tr><tr>
+            </tr>
+            <tr>
                 <td>
                     <label>编号:</label>
                 </td>
                 <td>
-                    <input style={{"backgroundColor":this.state.bg.baoxiang}} type="text" id="baoxiang" name="bh" value={this.state.packitem.bh}  onChange={this.handleChange} />
+                    <input style={{"backgroundColor":this.state.bg.baoxiang}} type="text" id="baoxiang" name="bh" value={item.bh}  onChange={this.handleChange} />
                 </td>
-            </tr><tr>
+            </tr>
+            <tr>
+                <td>
+                    <label>单位:</label>
+                </td>
+                <td>
+                    <input style={{"backgroundColor":this.state.bg.baoxiang}} type="text" id="baoxiang" name="bh" value={item.danwei}  onChange={this.handleChange} />
+                </td>
+            </tr>
+            <tr>
                 <td>
                     <label>数量:</label>
                 </td>

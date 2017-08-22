@@ -172,6 +172,16 @@ socket.on('/post/PackItemEx', async function( data, callback ) {
 		message: "create PackItem ok"
 	});
  });
+socket.on('/put/PackItemEx', async function( data, callback ) {				
+	console.log(data);	
+	var rec1 = await models.Item.create(data)
+	var rec = await models.PackItem.create({pack_id:data.pack_id,item_id:rec1.id,ct:1,quehuo:false})
+	rec.dataValues["Item"] = rec1;
+	callback({
+		data: rec,
+		message: "update PackItem ok"
+	});
+ });
 //route.get('/rest/UsePack', async function(ctx,next) {
 socket.on('/get/UsePack', async function( data, callback ) {				
 	var start = data.start;
