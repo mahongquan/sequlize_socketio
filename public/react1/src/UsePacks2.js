@@ -76,7 +76,7 @@ class UsePacks2 extends React.Component {
   };
   new_pack= (id) => {
     var url="/UsePackEx";
-    var data={"name":this.state.newPackName,contact:this.props.contact_id};
+    var data={"name":this.state.newPackName,contact_id:this.props.contact_id};
     Client.post(url,data,(res) => {
         var p=res.data;
         const newFoods = this.state.usepacks.concat(p);
@@ -85,7 +85,7 @@ class UsePacks2 extends React.Component {
   };
   addrow=(pack_id)=>{
     var url="/UsePack";
-    var data={contact:this.props.contact_id,pack:pack_id};
+    var data={contact_id:this.props.contact_id,pack_id:pack_id};
     Client.postOrPut(url,data,(res) => {
         var p=res.data;
         const newFoods = this.state.usepacks.concat(p);

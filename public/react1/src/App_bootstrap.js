@@ -246,14 +246,16 @@ class App extends Component {
     <tbody>
     <tr>
    <td>
-     <DropdownButton title={this.state.user} id="id_dropdown1">
-        <li hidden={this.state.user!=="AnonymousUser"}>
-          <ExampleModal onLoginSubmit={this.onLoginSubmit} title="登录" />
-        </li>
-        <li  hidden={this.state.user==="AnonymousUser"} >
-          <a onClick={this.handleLogout}>注销</a>
-        </li>
-     </DropdownButton>
+   {
+     // <DropdownButton title={this.state.user} id="id_dropdown1">
+     //    <li hidden={this.state.user!=="AnonymousUser"}>
+     //      <ExampleModal onLoginSubmit={this.onLoginSubmit} title="登录" />
+     //    </li>
+     //    <li  hidden={this.state.user==="AnonymousUser"} >
+     //      <a onClick={this.handleLogout}>注销</a>
+     //    </li>
+     // </DropdownButton>
+   }
   </td>
   <td>
         <input type="text" value={this.state.search}  placeholder="合同 or 仪器编号" onChange={this.handleSearchChange} />

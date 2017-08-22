@@ -35,7 +35,7 @@ class DlgItems extends Component {
    this.loaddata();
   }
   loaddata=()=>{
-   Client.get("/rest/Item",
+   Client.get("/Item",
       { start:this.mystate.start,
         limit:this.mystate.limit,
         search:this.mystate.search,

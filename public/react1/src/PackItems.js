@@ -58,8 +58,8 @@ class PackItems extends React.Component {
     };
   };
   new_packitem= (id) => {
-    var url="/BothPackItem";
-    var data={"name":this.state.newPackName,"pack":this.props.pack_id};
+    var url="/PackItemEx";
+    var data={danwei:"",bh:"",guige:"",ct:0,name:this.state.newPackName,pack_id:this.props.pack_id};
     console.log(data);
     Client.postOrPut(url,data,(res) => {
         var p=res.data;
@@ -75,7 +75,7 @@ class PackItems extends React.Component {
   };
   addrow=(item_id)=>{
     var url="/PackItem";
-    var data={pack:this.props.pack_id,itemid:item_id};
+    var data={pack_id:this.props.pack_id,item_id:item_id,ct:1,quehuo:false};
     Client.post(url,data,(res) => {
         var p=res.data;
         const newFoods = this.state.items.concat(p);

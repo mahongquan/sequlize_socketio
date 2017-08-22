@@ -1,7 +1,6 @@
 #!/usr/bin/env node
 var static = require('./node-static');
 var file = new static.Server('./public');
-var socket = require('./routes/socket.js');
 var debug = require('debug')('express-example');
 var models = require("./models");
 
@@ -56,7 +55,9 @@ socket.on('/put/Contact', async function( data, callback ) {
 socket.on('/get/Contact', async function( data, callback ) {				
 	var start = data.start;
 	var limit = data.limit;
-	var search = data.search;
+	let search="";
+	if(data.search)
+		search = data.search;
 	var baoxiang = '';
 	if (data.baoxiang) {
 		baoxiang = data.baoxiang;
@@ -124,7 +125,7 @@ socket.on('/get/Contact', async function( data, callback ) {
 //UsePack//////////////////////////////////////////////////////////////////////
 //route.delete('/rest/UsePack/:contact_id', async function(ctx) {
 socket.on('/delete/UsePack', async function( data, callback ) {				
-	var contact = await models.UsePack.findById(data.contact_id); //.then(function(packitem) {
+	var contact = await models.UsePack.findById(data.id); //.then(function(packitem) {
 	contact.destroy();
 	callback({
 		data: [],
@@ -153,30 +154,24 @@ socket.on('/put/UsePack', async function( data, callback ) {
 });
 socket.on('/post/UsePackEx', async function( data, callback ) {				
 	console.log(data);	
-	// if(data.name):
- //        var rec1 = await models.Pack.create(data)
-    
- //        var rec = await models.UsePack.create(data)
- //        rec=UsePack()
- //        rec.pack=rec1
- //        contactid=int(data.get("contact"))
- //        contact=Contact.objects.get(id=contactid)
- //        rec.contact=contact
- //        rec.save()
- //        output={"success":True,"message":"Created new User" +str(rec.id)}
- //        output["data"]={"id":rec.id,"name":rec1.name,"contact":rec.contact.id,"pack":rec.pack.id,"hetongbh":rec.contact.hetongbh}
- //        return HttpResponse(json.dumps(output, ensure_ascii=False,cls=MyEncoder))
- //    else:
- //        output={"success":False,"message":"No enough parameters"}
- //        output["data"]={}
- //        return HttpResponse(json.dumps(output, ensure_ascii=False,cls=MyEncoder))        
-        
-	// contact={}
-	// callback({
-	// 	data: contact,
-	// 	message: "update  UsePack ok"
-	// });
-});
+	var rec1 = await models.Pack.create(data)
+	var rec = await models.UsePack.create({contact_id:data.contact_id,pack_id:rec1.id})
+	rec.dataValues["Pack"] = rec1;
+	callback({
+		data: rec,
+		message: "create UsePack ok"
+	});
+ });
+socket.on('/post/PackItemEx', async function( data, callback ) {				
+	console.log(data);	
+	var rec1 = await models.Item.create(data)
+	var rec = await models.PackItem.create({pack_id:data.pack_id,item_id:rec1.id,ct:1,quehuo:false})
+	rec.dataValues["Item"] = rec1;
+	callback({
+		data: rec,
+		message: "create PackItem ok"
+	});
+ });
 //route.get('/rest/UsePack', async function(ctx,next) {
 socket.on('/get/UsePack', async function( data, callback ) {				
 	var start = data.start;
@@ -209,7 +204,7 @@ socket.on('/get/UsePack', async function( data, callback ) {
 //PackItem//////////////////////////////////////////////////////////////////////
 //route.delete('/rest/PackItem/:contact_id',  async function(ctx,contact_id) {
 socket.on('/delete/PackItem', async function( data, callback ) {				
-	var contact = await models.PackItem.findById(data.contact_id); //.then(function(packitem) {
+	var contact = await models.PackItem.findById(data.id); //.then(function(packitem) {
 	contact.destroy();
 	callback({
 		data: [],
