@@ -172,16 +172,37 @@ socket.on('/post/PackItemEx', async function( data, callback ) {
 		message: "create PackItem ok"
 	});
  });
-socket.on('/put/PackItemEx', async function( data, callback ) {				
-	console.log(data);	
-	var rec1 = await models.Item.create(data)
-	var rec = await models.PackItem.create({pack_id:data.pack_id,item_id:rec1.id,ct:1,quehuo:false})
-	rec.dataValues["Item"] = rec1;
-	callback({
-		data: rec,
-		message: "update PackItem ok"
-	});
- });
+// { id: 50,
+//   pack_id: 4,
+//   item_id: 54,
+//   ct: 10,
+//   Item: 
+//    { id: 54,
+//      bh: '010103f001105',
+//      name: 'ON操作维护展板',
+//      guige: '',
+//      ct: 1,
+//      danwei: '个',
+//      beizhu: null,
+//      image: 'item/20140326_011.jpg' } }
+
+// socket.on('/put/PackItemEx', async function( data, callback ) {				
+// 	console.log(data);	
+// 	var packitem = await models.PackItem.findById(data.id, {
+// 		include: [{
+// 			model: models.Item,
+// 		}],
+// 	}); //.then(function(packitem) {
+// 	console.log("==============================");
+// 	console.log(packitem);
+// 	packitem.update(data);
+// 	packitem.Item.save();
+// 	packitem.save();
+// 	callback({
+// 		data: packitem,
+// 		message: "update PackItem ok"
+// 	});
+//  });
 //route.get('/rest/UsePack', async function(ctx,next) {
 socket.on('/get/UsePack', async function( data, callback ) {				
 	var start = data.start;
@@ -263,7 +284,8 @@ socket.on('/put/PackItem', async function( data, callback ) {
 socket.on('/get/PackItem', async function( data, callback ) {				
 	var start = data.start;
 	var limit = data.limit;
-	var search = data.search;
+	let search="";
+	if(data.search) search = data.search;
 	var w = {
 		pack_id: data.pack_id
 	};
