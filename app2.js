@@ -151,6 +151,32 @@ socket.on('/put/UsePack', async function( data, callback ) {
 		message: "update  UsePack ok"
 	});
 });
+socket.on('/post/UsePackEx', async function( data, callback ) {				
+	console.log(data);	
+	// if(data.name):
+ //        var rec1 = await models.Pack.create(data)
+    
+ //        var rec = await models.UsePack.create(data)
+ //        rec=UsePack()
+ //        rec.pack=rec1
+ //        contactid=int(data.get("contact"))
+ //        contact=Contact.objects.get(id=contactid)
+ //        rec.contact=contact
+ //        rec.save()
+ //        output={"success":True,"message":"Created new User" +str(rec.id)}
+ //        output["data"]={"id":rec.id,"name":rec1.name,"contact":rec.contact.id,"pack":rec.pack.id,"hetongbh":rec.contact.hetongbh}
+ //        return HttpResponse(json.dumps(output, ensure_ascii=False,cls=MyEncoder))
+ //    else:
+ //        output={"success":False,"message":"No enough parameters"}
+ //        output["data"]={}
+ //        return HttpResponse(json.dumps(output, ensure_ascii=False,cls=MyEncoder))        
+        
+	// contact={}
+	// callback({
+	// 	data: contact,
+	// 	message: "update  UsePack ok"
+	// });
+});
 //route.get('/rest/UsePack', async function(ctx,next) {
 socket.on('/get/UsePack', async function( data, callback ) {				
 	var start = data.start;
