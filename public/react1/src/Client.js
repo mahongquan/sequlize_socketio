@@ -16,6 +16,9 @@ function delete1(url,data,cb) {
 function post(url,data,cb) {
   socket.emit("/post"+url,data,cb)
 }
+function put(url,data,cb) {
+  socket.emit("/put"+url,data,cb)
+}
 function postOrPut(url,data,cb) {
   var method="post"
   if (data.id){

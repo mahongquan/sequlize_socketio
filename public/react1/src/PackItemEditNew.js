@@ -62,6 +62,29 @@ class PackItemEditNew extends Component{
     console.log(contact2);
     this.setState({packitem:contact2});
   }
+  handleChange_item=(e)=>{
+    console.log("change");
+    console.log(e);
+    console.log(e.target);
+    console.log(e.target.value);
+    console.log(e.target.name);
+    if(this.old.Item[e.target.name]===e.target.value)
+    {
+      const bg2=update(this.state.bg,{[e.target.name]:{$set:"#ffffff"}})
+      //this.state.bg[e_target_name]="#ffffff";
+      //console.log("equal");
+      this.setState({bg:bg2});
+    }
+    else{
+       const bg2=update(this.state.bg,{[e.target.name]:{$set:"#8888ff"}})
+      //this.state.bg[e_target_name]="#ffffff";
+      //console.log("equal");
+      this.setState({bg:bg2}); 
+    }
+    const contact2=update(this.state.packitem,{Item:{[e.target.name]: {$set:e.target.value}}});
+    console.log(contact2);
+    this.setState({packitem:contact2});
+  }
   handleChange=(e)=>{
     console.log("change");
     console.log(e);
@@ -105,19 +128,31 @@ class PackItemEditNew extends Component{
                 <td >
                     <input type="text" id="id" name="id" readOnly="true"  disabled="disabled"    defaultValue={this.state.packitem.id} />
                 </td>
-            </tr><tr>
+            </tr>
+            <tr >
+                <td >
+                    ItemID:
+                </td>
+                <td >
+                    <input type="text" id="itemid" name="item_id" readOnly="true"  disabled="disabled"    
+                    defaultValue={item.id} />
+                </td>
+            </tr>
+            <tr>
                 <td>
                     名称:
                 </td>
                 <td>
-                    <input  style={{"backgroundColor":this.state.bg.addr}}  type="text" id="addr" name="name" value={item.name} onChange={this.handleChange} />
+                    <input  style={{"backgroundColor":this.state.bg.addr}}  type="text" id="addr" name="name" value={item.name}
+                     onChange={this.handleChange_item} />
                 </td>
             </tr><tr>
                 <td>
                     <label>规格:</label>
                 </td>
                 <td>
-                    <input style={{"backgroundColor":this.state.bg.yiqixinghao}} type="text"  name="guige" value={item.guige}  onChange={this.handleChange} />
+                    <input style={{"backgroundColor":this.state.bg.yiqixinghao}} type="text"  
+                    name="guige" value={item.guige}  onChange={this.handleChange_item} />
                 </td>
             </tr>
             <tr>
@@ -125,7 +160,8 @@ class PackItemEditNew extends Component{
                     <label>编号:</label>
                 </td>
                 <td>
-                    <input style={{"backgroundColor":this.state.bg.baoxiang}} type="text" id="baoxiang" name="bh" value={item.bh}  onChange={this.handleChange} />
+                    <input style={{"backgroundColor":this.state.bg.baoxiang}} type="text" 
+                    id="baoxiang" name="bh" value={item.bh}  onChange={this.handleChange_item} />
                 </td>
             </tr>
             <tr>
@@ -133,7 +169,8 @@ class PackItemEditNew extends Component{
                     <label>单位:</label>
                 </td>
                 <td>
-                    <input style={{"backgroundColor":this.state.bg.baoxiang}} type="text" id="baoxiang" name="bh" value={item.danwei}  onChange={this.handleChange} />
+                    <input style={{"backgroundColor":this.state.bg.baoxiang}} type="text" 
+                    id="baoxiang" name="bh" value={item.danwei}  onChange={this.handleChange_item} />
                 </td>
             </tr>
             <tr>
