@@ -49,7 +49,7 @@ class PackItems extends React.Component {
     if (value.length>1)
     {
       this.setState({ auto_value:value, auto_loading: true });
-      Client.get("/rest/Item",{query:value} ,(items) => {
+      Client.get("/Item",{query:value} ,(items) => {
           this.setState({ auto_items: items.data, auto_loading: false })
       });
     }
@@ -58,7 +58,7 @@ class PackItems extends React.Component {
     };
   };
   new_packitem= (id) => {
-    var url="/rest/BothPackItem";
+    var url="/BothPackItem";
     var data={"name":this.state.newPackName,"pack":this.props.pack_id};
     console.log(data);
     Client.postOrPut(url,data,(res) => {
@@ -74,7 +74,7 @@ class PackItems extends React.Component {
     this.setState({items:contacts2});
   };
   addrow=(item_id)=>{
-    var url="/rest/PackItem";
+    var url="/PackItem";
     var data={pack:this.props.pack_id,itemid:item_id};
     Client.post(url,data,(res) => {
         var p=res.data;
@@ -88,7 +88,7 @@ class PackItems extends React.Component {
   onEditClick = (id) => {
   };
   onDeleteClick = (itemIndex) => {
-    var url="/rest/PackItem";
+    var url="/PackItem";
     Client.delete1(url,{id:this.state.items[itemIndex].id},(res) => {
         const filteredFoods = this.state.items.filter(
           (item, idx) => itemIndex !== idx,

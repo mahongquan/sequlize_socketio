@@ -56,7 +56,7 @@ class UsePacks2 extends React.Component {
     if (value.length>1)
     {
       this.setState({ auto_value:value, auto_loading: true });
-      Client.get("/rest/Pack",{search:value} ,(items) => {
+      Client.get("/Pack",{search:value} ,(items) => {
           this.setState({ auto_items: items.data, auto_loading: false })
       });
     }
@@ -75,7 +75,7 @@ class UsePacks2 extends React.Component {
     this.auto_change(null,"必备");
   };
   new_pack= (id) => {
-    var url="/rest/UsePackEx";
+    var url="/UsePackEx";
     var data={"name":this.state.newPackName,contact:this.props.contact_id};
     Client.postOrPut(url,data,(res) => {
         var p=res.data;
@@ -84,7 +84,7 @@ class UsePacks2 extends React.Component {
     });
   };
   addrow=(pack_id)=>{
-    var url="/rest/UsePack";
+    var url="/UsePack";
     var data={contact:this.props.contact_id,pack:pack_id};
     Client.postOrPut(url,data,(res) => {
         var p=res.data;
@@ -98,7 +98,7 @@ class UsePacks2 extends React.Component {
   onEditClick = (id) => {
   };
   onDeleteClick = (itemIndex) => {
-    var url="/rest/UsePack";
+    var url="/UsePack";
     Client.delete1(url,{id:this.state.usepacks[itemIndex].id},(res) => {
         const filteredFoods = this.state.usepacks.filter(
           (item, idx) => itemIndex !== idx,
@@ -117,7 +117,7 @@ class UsePacks2 extends React.Component {
       return Promise.resolve({ options: [] });
     }
 
-    return fetch("/rest/Pack?limit=10&search="+input,{credentials: 'include'})
+    return fetch("/Pack?limit=10&search="+input,{credentials: 'include'})
     .then((response) => response.json())
     .then((json) => {
       var r={ options: json.data};

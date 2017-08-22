@@ -5,6 +5,9 @@ function getRaw(url,cb) {
   socket.emit("/get"+url,{},cb);
 }
 function get(url,data,cb) {
+  console.log("emit")
+  console.log(url);
+  console.log(data);
   socket.emit("/get"+url,data,cb)
 }
 function delete1(url,data,cb) {
