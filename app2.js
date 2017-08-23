@@ -115,7 +115,7 @@ socket.on('/get/Contact', async function( data, callback ) {
 		where: w,
 		limit: limit,
 		offset: start,
-		order: 'yujifahuo_date DESC'
+		order: [['yujifahuo_date','DESC']]
 	})
 	callback({
 		data: contacts,
@@ -399,7 +399,7 @@ socket.on('/get/Item', async function( data, callback ) {
 		where: w,
 		limit: limit,
 		offset: start,
-		order: 'id DESC'
+		order: [['id','DESC']]
 	});
 	if (contacts.length > 0) {
 		callback({

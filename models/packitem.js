@@ -7,8 +7,10 @@ module.exports = function(sequelize, DataTypes) {
      ct:DataTypes.INTEGER,
      quehuo:DataTypes.BOOLEAN,
   }, {
-    classMethods: {
-      associate: function(models) {
+    timestamps: false,
+    tableName: 'parts_packitem'
+  });
+      PackItem.associate=function(models) {
         PackItem.belongsTo(models.Item,{
           foreignKey:"item_id"
         })
@@ -16,10 +18,5 @@ module.exports = function(sequelize, DataTypes) {
           foreignKey:"item_id"
         })
       }
-    },
-    timestamps: false,
-    tableName: 'parts_packitem'
-  });
-
   return PackItem;
 };
