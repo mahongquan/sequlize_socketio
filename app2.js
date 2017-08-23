@@ -398,7 +398,8 @@ socket.on('/get/Item', async function( data, callback ) {
 	var contacts = await models.Item.findAll({
 		where: w,
 		limit: limit,
-		offset: start
+		offset: start,
+		order: 'id DESC'
 	});
 	if (contacts.length > 0) {
 		callback({
