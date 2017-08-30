@@ -1,6 +1,5 @@
 var {Bar,Table,Modal,Navbar,Nav,NavItem,DropdownButton,MenuItem}=ReactBootstrap;
 var update=newContext();
-var Autocomplete=ReactAutocomplete;
 var DateTime=Datetime;
 var host="";
 var socket=io();
@@ -276,24 +275,21 @@ class PackItems extends React.Component {
         });
       });
   };
-  auto_select=(value, item) => {
+  auto_select=(event,data) => {
       console.log("selected");
-      console.log(item);
-      this.addrow(item.id);
+      console.log(data)
+      this.addrow(data.suggestion.id);
       //this.setState({auto_value:value, auto_items: [ item ] })
   }
-  auto_change=(event, value)=>{
+  auto_change=(data)=>{
+    var value=data.value;
     console.log("auto_change");
     if (value.length>1)
     {
-      this.setState({ auto_value:value, auto_loading: true });
-      Client.get("/Item",{query:value} ,(items) => {
+      Client.get("/Item",{search:value} ,(items) => {
           this.setState({ auto_items: items.data, auto_loading: false })
       });
     }
-    else{
-      this.setState({ auto_value:value, auto_loading: false });
-    };
   };
   new_packitem= (id) => {
     var url="/PackItemEx";
@@ -337,12 +333,16 @@ class PackItems extends React.Component {
   handleEdit=(idx)=>{
     this.refs.dlg.open2(idx);
   }
+  onChange=(event, { newValue })=>{
+    console.log(newValue);
+    this.setState({auto_value:newValue});
+  }
   render() {
+    console.log("render");
+    console.log(this.state);
     const { items } = this.state;
     const itemRows = items.map((item, idx) => (
-      <tr
-        key={idx}
-      >
+      <tr key={idx}>
         <td >{item.id}</td>
         <td >{item.Item.name}</td>
         <td>{item.Item.guige}</td>
@@ -375,15 +375,15 @@ class PackItems extends React.Component {
             {itemRows}
           </tbody>
         </Table>
-        输入备件<Autocomplete
-          inputProps={{ id: 'states-autocomplete' }}
+        输入备件<Autosuggest
+          inputProps={{ id: 'states-autocomplete',value:this.state.auto_value,onChange:this.onChange}}
+          onSuggestionSelected={this.auto_select}
+          onSuggestionsFetchRequested={this.auto_change}
+          onSuggestionsClearRequested={this.onSuggestionsClearRequested}
+          getSuggestionValue={(item) => item.name}
           ref="autocomplete"
-          value={this.state.auto_value}
-          items={this.state.auto_items}
-          getItemValue={(item) => item.name}
-          onSelect={this.auto_select}
-          onChange={this.auto_change}
-          renderItem={(item, isHighlighted) => (
+          suggestions={this.state.auto_items}
+          renderSuggestion={(item, isHighlighted) => (
             <div
               style={isHighlighted ? styles.highlightedItem : styles.item}
               key={item.id}
@@ -399,8 +399,7 @@ class PackItems extends React.Component {
       </div>
     );
   }
-}
-/////////////////
+}/////////////////
 class UsePackEditNew extends React.Component{
   state={ 
       showModal: false,
@@ -737,7 +736,6 @@ class UsePacks2 extends React.Component {
     newPackName: '',
     auto_value: '',
     auto_items:[],
-    auto_loading: false,
     release:true,
   };
    componentWillReceiveProps(nextProps) {
@@ -758,23 +756,19 @@ class UsePacks2 extends React.Component {
       this.load_data(this.props.contact_id);
     }
   };
-  auto_change=(event, value)=>{
-    console.log("auto_change");
+  auto_change=(data)=>{
+    var value=data.value;
     if (value.length>1)
     {
-      this.setState({ auto_value:value, auto_loading: true });
       Client.get("/Pack",{search:value} ,(items) => {
-          this.setState({ auto_items: items.data, auto_loading: false })
+          this.setState({ auto_items: items.data })
       });
     }
-    else{
-      this.setState({ auto_value:value, auto_loading: false });
-    };
   };
-  auto_select=(value, item) => {
+  auto_select=(event,data) => {
       console.log("selected");
-      console.log(item);
-      this.addrow(item.id);
+      console.log(data)
+      this.addrow(data.suggestion.id);
       //this.setState({auto_value:value, auto_items: [ item ] })
   }
   bibei= (id) => {
@@ -799,6 +793,10 @@ class UsePacks2 extends React.Component {
         this.setState({ usepacks: newFoods });
     });
   };
+  onChange=(event, { newValue })=>{
+    console.log(newValue);
+    this.setState({auto_value:newValue});
+  }
   newpackChange=(e)=>{
     this.setState({newPackName:e.target.value});
   };
@@ -877,25 +875,15 @@ class UsePacks2 extends React.Component {
           </tbody>
         </Table>
         <div>
-        输入包
-        {
-          // <Select.Async multi={false} 
-          // value={this.state.auto_value} 
-          // onChange={this.onChange} 
-          // onValueClick={this.onValueClick} 
-          // valueKey="id" labelKey="name" 
-          // loadOptions={this.getUsers}
-          // />
-        }
-        <Autocomplete
-          inputProps={{ id: 'states-autocomplete' }}
+        输入包<Autosuggest
+          inputProps={{ id: 'states-autocomplete',value:this.state.auto_value,onChange:this.onChange}}
+          onSuggestionSelected={this.auto_select}
+          onSuggestionsFetchRequested={this.auto_change}
+          onSuggestionsClearRequested={this.onSuggestionsClearRequested}
+          getSuggestionValue={(item) => item.name}
           ref="autocomplete"
-          value={this.state.auto_value}
-          items={this.state.auto_items}
-          getItemValue={(item) => item.name}
-          onSelect={this.auto_select}
-          onChange={this.auto_change}
-          renderItem={(item, isHighlighted) => (
+          suggestions={this.state.auto_items}
+          renderSuggestion={(item, isHighlighted) => (
             <div
               style={isHighlighted ? styles.highlightedItem : styles.item}
               key={item.id}
@@ -1098,25 +1086,22 @@ class DlgCopyPack  extends React.Component{
           self.setState({ error:result.message})
     });
   }
-  auto_change=(event, value)=>{
+  auto_change=(data)=>{
+    var value=data.value;
     console.log("auto_change");
     if (value.length>1)
     {
-      this.setState({ auto_value:value, auto_loading: true });
-      Client.get("/rest/Pack",{search:value} ,(items) => {
+      Client.get("/Pack",{search:value} ,(items) => {
           this.setState({ auto_items: items.data, auto_loading: false })
       });
     }
-    else{
-      this.setState({ auto_value:value, auto_loading: false });
-    };
-  }
-  auto_select=(value, item)=>{
+  };
+   auto_select=(event,data) => {
       console.log("selected");
-      console.log(item);
-      //todo this.addrow(item.id);
-      this.src_id=item.id;
-      this.setState({auto_value:value, auto_items: [ item ] })
+      console.log(data)
+      this.addrow(data.suggestion.id);
+      this.src_id=data.suggestion.id;
+      //this.setState({ auto_items: [ item ] })
   }
   close=()=>{
     this.setState({ showModal: false });
@@ -1124,6 +1109,10 @@ class DlgCopyPack  extends React.Component{
   open=()=>{
    this.setState({ showModal: true });
    this.src_id=null;
+  }
+  onChange=(event, { newValue })=>{
+    console.log(newValue);
+    this.setState({auto_value:newValue});
   }
   render=()=>{
     return (
@@ -1139,16 +1128,15 @@ class DlgCopyPack  extends React.Component{
               <td>
                 <label>包名称:</label>
               </td>
-              <td>
-                <Autocomplete
-                  inputProps={{ id: 'states-autocomplete' }}
-                  ref="autocomplete"
-                  value={this.state.auto_value}
-                  items={this.state.auto_items}
-                  getItemValue={(item) => item.name}
-                  onSelect={this.auto_select}
-                  onChange={this.auto_change}
-                  renderItem={(item, isHighlighted) => (
+              <td><Autosuggest
+          inputProps={{ id: 'states-autocomplete',value:this.state.auto_value,onChange:this.onChange}}
+          onSuggestionSelected={this.auto_select}
+          onSuggestionsFetchRequested={this.auto_change}
+          onSuggestionsClearRequested={this.onSuggestionsClearRequested}
+          getSuggestionValue={(item) => item.name}
+          ref="autocomplete"
+          suggestions={this.state.auto_items}
+          renderSuggestion={(item, isHighlighted) => (
                     <div
                       style={isHighlighted ? styles.highlightedItem : styles.item}
                       key={item.id}
@@ -1504,20 +1492,14 @@ class ContactEdit2New  extends React.Component{
     console.log(contact2);
     this.setState({contact:contact2});
   }
-  channels_change_new=(val)=>{
-    this.channels_select(null,val.value);
+  channels_change=(event, { newValue })=>{
+    this.change1(newValue);
   }
-  channels_change=(event, value)=>{
-    console.log("auto_change");
-    //this.setState({ yiqixinghao_value:value, auto_loading: false });
-    this.channels_select(null,value) 
+  channels_change_fetch=()=>{}
+  channels_select=(event,data)=>{
+    this.change1(data.suggestion);
   }
-  channels_input=(event)=>{
-    console.log(event);
-    //this.setState({ yiqixinghao_value:value, auto_loading: false });
-    this.channels_select(null,event) 
-  }
-  channels_select=(value, item)=>{
+  change1=(item)=>{
       console.log("selected");
       console.log(item);
       if(this.old.channels===item)
@@ -1533,12 +1515,13 @@ class ContactEdit2New  extends React.Component{
       console.log(contact2);
       this.setState({contact:contact2});
   }
-  yiqixinghao_change=(event, value)=>{
-    console.log("auto_change");
-    //this.setState({ yiqixinghao_value:value, auto_loading: false });
-    this.yiqixinghao_select(null,value) 
+  yiqixinghao_change=(event, { newValue })=>{
+    this.change2(newValue);
   }
-  yiqixinghao_select=(value, item)=>{
+  yiqixinghao_select=(event,data)=>{
+    this.change2(data.suggestion);
+  }
+  change2=(item)=>{
       console.log("selected");
       console.log(item);
       if(this.old.yiqixinghao===item)
@@ -1580,22 +1563,6 @@ class ContactEdit2New  extends React.Component{
      return      state.toLowerCase().indexOf(value.toLowerCase()) !== -1 ;
   }
   render=()=>{
-    // var o=[
-    //                     "1O(低氧)",
-    //                     "1O(高氧)",
-    //                     "1O(低氧)+2N",
-    //                     "1C(低碳)+2S",
-    //                     "1C(高碳)+2S",
-    //                     "2C+1S(低硫)",
-    //                     "2C+1S(高硫)",
-    //                     "2C+2S",
-    //                     "2O+2N",
-    //                     "2O",
-    //                   ];
-    // var options_channels=[];
-    // for(var i in o){
-    //   options_channels.push({label:o[i],value:o[i]});
-    // }
     return (
         <Modal show={this.state.showModal} onHide={this.close}  dialogClassName="custom-modal">
           <Modal.Header closeButton>
@@ -1628,24 +1595,16 @@ class ContactEdit2New  extends React.Component{
                     通道配置:
                 </td>
                 <td>
-                {
-                // <Select
-                //   name="form-field-name"
-                //   value={this.state.contact.channels}
-                //   options={options_channels}
-                //   onChange={this.channels_change_new}
-                //   onInputChange={this.channels_input}
-                // />
-              }
-                  <Autocomplete
-                      value={this.state.contact.channels}
+                  <Autosuggest
                       inputProps={
                         { 
                           id: 'channels-autocomplete',
-                          style:{backgroundColor:this.state.bg.channels}
+                          style:{backgroundColor:this.state.bg.channels},
+                          value:this.state.contact.channels,
+                          onChange:this.channels_change
                         }
                       }
-                      items={[
+                      suggestions={[
                         "1O(低氧)",
                         "1O(高氧)",
                         "1O(低氧)+2N",
@@ -1657,11 +1616,10 @@ class ContactEdit2New  extends React.Component{
                         "2O+2N",
                         "2O",
                       ]}
-                      getItemValue={(item) => item}
-                      onSelect={this.channels_select}
-                      onChange={this.channels_change}
-                      shouldItemRender={this.matchStateToTerm}
-                      renderItem={(item, isHighlighted) => (
+                      getSuggestionValue={(item) => item}
+                      onSuggestionSelected={this.channels_select}
+                      onSuggestionsFetchRequested={()=>{}}
+                      renderSuggestion={(item, isHighlighted) => (
                         <div
                           style={isHighlighted ? styles.highlightedItem : styles.item}
                           key={item}
@@ -1674,15 +1632,17 @@ class ContactEdit2New  extends React.Component{
                     <label>仪器型号:</label>
                 </td>
                 <td>
-                    <Autocomplete
-                      value={this.state.contact.yiqixinghao}
-                      inputProps={
+                {
+                    <Autosuggest
+                       inputProps={
                         { 
                           id: 'yiqixinghao-autocomplete',
-                          style:{backgroundColor:this.state.bg.yiqixinghao}
+                          style:{backgroundColor:this.state.bg.yiqixinghao},
+                          value:this.state.contact.yiqixinghao,
+                          onChange:this.yiqixinghao_change
                         }
                       }
-                      items={[
+                      suggestions={[
                         "CS-1011C",
                         "CS-2800",
                         "CS-3000",
@@ -1695,17 +1655,17 @@ class ContactEdit2New  extends React.Component{
                         "ON-4000",
                         "ONH-3000"
                       ]}
-                      getItemValue={(item) => item}
-                      onSelect={this.yiqixinghao_select}
-                      onChange={this.yiqixinghao_change}
-                      shouldItemRender={this.matchStateToTerm}
-                      renderItem={(item, isHighlighted) => (
+                      getSuggestionValue={(item) => item}
+                      onSuggestionsFetchRequested={()=>{}}
+                      onSuggestionSelected={this.yiqixinghao_select}
+                      renderSuggestion={(item, isHighlighted) => (
                         <div
                           style={isHighlighted ? styles.highlightedItem : styles.item}
                           key={item}
                         >{item}</div>
                       )}
                     />
+                }
                 </td>
                 <td>
                     <label>仪器编号:</label>
