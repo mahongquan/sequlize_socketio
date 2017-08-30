@@ -1,9 +1,9 @@
 var invariant = function(condition, format, a, b, c, d, e, f) {
-  if (NODE_ENV !== 'production') {
-    if (format === undefined) {
-      throw new Error('invariant requires an error message argument');
-    }
-  }
+  // if (NODE_ENV !== 'production') {
+  //   if (format === undefined) {
+  //     throw new Error('invariant requires an error message argument');
+  //   }
+  // }
 
   if (!condition) {
     var error;

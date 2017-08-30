@@ -1,4 +1,5 @@
 var {Bar,Table,Modal,Navbar,Nav,NavItem,DropdownButton,MenuItem}=ReactBootstrap;
+var update=newContext();
 var Autocomplete=ReactAutocomplete;
 var DateTime=Datetime;
 var host="";
@@ -92,6 +93,8 @@ class PackItemEditNew extends React.Component{
   handleSave=(data)=>{
     var url="/PackItem";
     Client.put(url,this.state.packitem,(res) => {
+      console.log("/put/PackItem");
+      console.log(res);
         this.setState({contact:res.data});
         this.parent.handlePackItemChange(this.index,res.data);
         this.old=res.data;
@@ -346,7 +349,7 @@ class PackItems extends React.Component {
         <td>{item.ct}</td>
         <td>{item.Item.bh}</td>
         <td  hidden={this.state.release}>{item.pack}</td>
-        <td><input type="checkbox" disabled="disabled" name="quehuo" defaultChecked={item.quehuo}  /></td>
+        <td><input type="checkbox" disabled="disabled" name="quehuo" checked={item.quehuo}  /></td>
         <td>
         <a onClick={()=>this.handleEdit(idx)}>编辑</a>
         <a style={{marginLeft:"10px"}} onClick={() => this.onDeleteClick(idx)}>删除</a>

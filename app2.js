@@ -254,7 +254,8 @@ socket.on('/post/PackItem', async function( data, callback ) {
 });
 //route.put('/rest/PackItem/:id',async  function(ctx,next) {
 socket.on('/put/PackItem', async function( data, callback ) {				
-	console.log(data.id);
+	console.log("/put/PackItem");
+	console.log(data);
 	var packitem = await models.PackItem.findById(data.id, {
 		include: [{
 			model: models.Item,

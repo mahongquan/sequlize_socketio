@@ -1,4 +1,4 @@
-var invariant = require('invariant');
+//var invariant = require('invariant');
 
 var hasOwnProperty = Object.prototype.hasOwnProperty;
 var splice = Array.prototype.splice;
@@ -132,8 +132,8 @@ var defaultCommands = {
   }
 };
 
-module.exports = newContext();
-module.exports.newContext = newContext;
+// module.exports = newContext();
+// module.exports.newContext = newContext;
 
 // invariants
 
