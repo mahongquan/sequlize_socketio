@@ -1,4 +1,359 @@
-var {Bar,Table,Modal,Navbar,Nav,NavItem,DropdownButton,MenuItem}=ReactBootstrap;
+var isEqual=_.isEqual;// from 'lodash/isEqual';
+var find=_.find;// import find from 'lodash/find';
+class ChartComponent extends React.Component {
+  static getLabelAsKey = d => d.label;
+  static propTypes = {
+    data: PropTypes.oneOfType([
+      PropTypes.object,
+      PropTypes.func
+    ]).isRequired,
+    getDatasetAtEvent: PropTypes.func,
+    getElementAtEvent: PropTypes.func,
+    getElementsAtEvent: PropTypes.func,
+    height: PropTypes.number,
+    legend: PropTypes.object,
+    onElementsClick: PropTypes.func,
+    options: PropTypes.object,
+    plugins: PropTypes.arrayOf(PropTypes.object),
+    redraw: PropTypes.bool,
+    type: function(props, propName, componentName) {
+      if(!Chart.controllers[props[propName]]) {
+        return new Error(
+          'Invalid chart type `' + props[propName] + '` supplied to' +
+          ' `' + componentName + '`.'
+        );
+      }
+    },
+    width: PropTypes.number,
+    datasetKeyProvider: PropTypes.func
+  }
+
+  static defaultProps = {
+    legend: {
+      display: true,
+      position: 'bottom'
+    },
+    type: 'doughnut',
+    height: 150,
+    width: 300,
+    redraw: false,
+    options: {},
+    datasetKeyProvider: ChartComponent.getLabelAsKey
+  }
+
+  componentWillMount() {
+    this.chart_instance = undefined;
+  }
+
+  componentDidMount() {
+    this.renderChart();
+  }
+
+  componentDidUpdate() {
+    if (this.props.redraw) {
+      this.chart_instance.destroy();
+      this.renderChart();
+      return;
+    }
+
+    this.updateChart();
+  }
+
+  shouldComponentUpdate(nextProps) {
+    const {
+      redraw,
+      type,
+      options,
+      plugins,
+      legend,
+      height,
+      width
+    } = this.props;
+
+    if (nextProps.redraw === true) {
+      return true;
+    }
+
+    if (height !== nextProps.height || width !== nextProps.width) {
+      return true;
+    }
+
+    if (type !== nextProps.type) {
+      return true;
+    }
+
+    if (!isEqual(legend, nextProps.legend)) {
+      return true;
+    }
+
+    if (!isEqual(options, nextProps.options)) {
+      return true;
+    }
+
+    const nextData = this.transformDataProp(nextProps);
+
+    if( !isEqual(this.shadowDataProp, nextData)) {
+      return true;
+    }
+
+    return !isEqual(plugins, nextProps.plugins);
+
+
+  }
+
+  componentWillUnmount() {
+    this.chart_instance.destroy();
+  }
+
+  transformDataProp(props) {
+    const { data } = props;
+    if (typeof(data) == 'function') {
+      const node = this.element;
+      return data(node);
+    } else {
+      return data;
+    }
+  }
+
+  // Chart.js directly mutates the data.dataset objects by adding _meta proprerty
+  // this makes impossible to compare the current and next data changes
+  // therefore we memoize the data prop while sending a fake to Chart.js for mutation.
+  // see https://github.com/chartjs/Chart.js/blob/master/src/core/core.controller.js#L615-L617
+  memoizeDataProps() {
+    if (!this.props.data) {
+      return;
+    }
+
+    const data = this.transformDataProp(this.props);
+
+    this.shadowDataProp = {
+      ...data,
+      datasets: data.datasets && data.datasets.map(set => {
+        return {
+            ...set
+        };
+      })
+    };
+
+    return data;
+  }
+
+  updateChart() {
+    const {options} = this.props;
+
+    const data = this.memoizeDataProps(this.props);
+
+    if (!this.chart_instance) return;
+
+    if (options) {
+      this.chart_instance.options = Chart.helpers.configMerge(this.chart_instance.options, options);
+    }
+
+    // Pipe datasets to chart instance datasets enabling
+    // seamless transitions
+    let currentDatasets = (this.chart_instance.config.data && this.chart_instance.config.data.datasets) || [];
+    const nextDatasets = data.datasets || [];
+
+    // use the key provider to work out which series have been added/removed/changed
+    const currentDatasetKeys = currentDatasets.map(this.props.datasetKeyProvider);
+    const nextDatasetKeys = nextDatasets.map(this.props.datasetKeyProvider);
+    const newDatasets = nextDatasets.filter(d => currentDatasetKeys.indexOf(this.props.datasetKeyProvider(d)) === -1);
+
+    // process the updates (via a reverse for loop so we can safely splice deleted datasets out of the array
+    for (let idx = currentDatasets.length - 1; idx >= 0; idx -= 1) {
+      const currentDatasetKey = this.props.datasetKeyProvider(currentDatasets[idx]);
+      if (nextDatasetKeys.indexOf(currentDatasetKey) === -1) {
+        // deleted series
+        currentDatasets.splice(idx, 1);
+      } else {
+        const retainedDataset = find(nextDatasets, d => this.props.datasetKeyProvider(d) === currentDatasetKey);
+        if (retainedDataset) {
+          // update it in place if it is a retained dataset
+          currentDatasets[idx].data.splice(retainedDataset.data.length);
+          retainedDataset.data.forEach((point, pid) => {
+            currentDatasets[idx].data[pid] = retainedDataset.data[pid];
+          });
+          const {data, ...otherProps} = retainedDataset;
+          currentDatasets[idx] = {
+            data: currentDatasets[idx].data,
+            ...currentDatasets[idx],
+            ...otherProps
+          };
+        }
+      }
+    }
+    // finally add any new series
+    newDatasets.forEach(d => currentDatasets.push(d));
+    const { datasets, ...rest } = data;
+
+    this.chart_instance.config.data = {
+      ...this.chart_instance.config.data,
+      ...rest
+    };
+
+    this.chart_instance.update();
+  }
+
+  renderChart() {
+    const {options, legend, type, redraw, plugins} = this.props;
+    const node = this.element;
+    const data = this.memoizeDataProps();
+
+    if(typeof legend !== 'undefined' && !isEqual(ChartComponent.defaultProps.legend, legend)) {
+      options.legend = legend;
+    }
+
+    this.chart_instance = new Chart(node, {
+      type,
+      data,
+      options,
+      plugins
+    });
+  }
+
+  handleOnClick = (event) => {
+    const instance = this.chart_instance;
+
+    const {
+      getDatasetAtEvent,
+      getElementAtEvent,
+      getElementsAtEvent,
+      onElementsClick
+    } = this.props;
+
+    getDatasetAtEvent && getDatasetAtEvent(instance.getDatasetAtEvent(event), event);
+    getElementAtEvent && getElementAtEvent(instance.getElementAtEvent(event), event);
+    getElementsAtEvent && getElementsAtEvent(instance.getElementsAtEvent(event), event);
+    onElementsClick && onElementsClick(instance.getElementsAtEvent(event), event); // Backward compatibility
+  }
+
+  ref = (element) => {
+    this.element = element
+  }
+
+  render() {
+    const {height, width, onElementsClick} = this.props;
+
+    return (
+      <canvas
+        ref={this.ref}
+        height={height}
+        width={width}
+        onClick={this.handleOnClick}
+      />
+    );
+  }
+}
+
+class Doughnut extends React.Component {
+  render() {
+    return (
+      <ChartComponent
+        {...this.props}
+        ref={ref => this.chart_instance = ref && ref.chart_instance}
+        type='doughnut'
+      />
+    );
+  }
+}
+
+class Pie extends React.Component {
+  render() {
+    return (
+      <ChartComponent
+        {...this.props}
+        ref={ref => this.chart_instance = ref && ref.chart_instance}
+        type='pie'
+      />
+    );
+  }
+}
+
+class Line extends React.Component {
+  render() {
+    return (
+      <ChartComponent
+        {...this.props}
+        ref={ref => this.chart_instance = ref && ref.chart_instance}
+        type='line'
+      />
+    );
+  }
+}
+
+class Bar extends React.Component {
+  render() {
+    return (
+      <ChartComponent
+        {...this.props}
+        ref={ref => this.chart_instance = ref && ref.chart_instance}
+        type='bar'
+      />
+    );
+  }
+}
+
+class HorizontalBar extends React.Component {
+  render() {
+    return (
+      <ChartComponent
+        {...this.props}
+        ref={ref => this.chart_instance = ref && ref.chart_instance}
+        type='horizontalBar'
+      />
+    );
+  }
+}
+
+class Radar extends React.Component {
+  render() {
+    return (
+      <ChartComponent
+        {...this.props}
+        ref={ref => this.chart_instance = ref && ref.chart_instance}
+        type='radar'
+      />
+    );
+  }
+}
+
+class Polar extends React.Component {
+  render() {
+    return (
+      <ChartComponent
+        {...this.props}
+        ref={ref => this.chart_instance = ref && ref.chart_instance}
+        type='polarArea'
+      />
+    );
+  }
+}
+
+class Bubble extends React.Component {
+  render() {
+    return (
+      <ChartComponent
+        {...this.props}
+        ref={ref => this.chart_instance = ref && ref.chart_instance}
+        type='bubble'
+      />
+    );
+  }
+}
+
+class Scatter extends React.Component {
+  render() {
+    return (
+      <ChartComponent
+        {...this.props}
+        ref={ref => this.chart_instance = ref && ref.chart_instance}
+        type='scatter'
+      />
+    );
+  }
+}
+//////////////
+var {Table,Modal,Navbar,Nav,NavItem,DropdownButton,MenuItem}=ReactBootstrap;
 var update=newContext();
 var DateTime=Datetime;
 var host="";
@@ -293,7 +648,7 @@ class PackItems extends React.Component {
   };
   new_packitem= (id) => {
     var url="/PackItemEx";
-    var data={danwei:"",bh:"",guige:"",ct:0,name:this.state.newPackName,pack_id:this.props.pack_id};
+    var data={danwei:"",bh:"",guige:"",ct:0,img:"",name:this.state.newPackName,pack_id:this.props.pack_id};
     console.log(data);
     Client.postOrPut(url,data,(res) => {
         var p=res.data;
@@ -773,7 +1128,9 @@ class UsePacks2 extends React.Component {
   }
   bibei= (id) => {
     //this.setState({auto_value:"必备"});
-    this.auto_change(null,"必备");
+    this.onChange(null,{newValue:"必备"});
+    console.log(this.refs.autocomplete);
+
   };
   new_pack= (id) => {
     var url="/UsePackEx";
@@ -793,10 +1150,6 @@ class UsePacks2 extends React.Component {
         this.setState({ usepacks: newFoods });
     });
   };
-  onChange=(event, { newValue })=>{
-    console.log(newValue);
-    this.setState({auto_value:newValue});
-  }
   newpackChange=(e)=>{
     this.setState({newPackName:e.target.value});
   };
@@ -830,9 +1183,11 @@ class UsePacks2 extends React.Component {
       return r;
     });
   }
-  onChange=(value)=>{
+  onChange=(event, { newValue })=>{
+    console.log("onChange======================");
+    console.log(newValue)
     this.setState({
-      auto_value: value,
+      auto_value: newValue,
     });
   }
   onValueClick=(value)=>{
@@ -855,7 +1210,8 @@ class UsePacks2 extends React.Component {
         </td>
       </tr>
     ));
-
+    console.log("UsePacks2 render===================");
+    console.log(this.state);
     return (
     <div>
         <UsePackEditNew ref="edit1" parent={this} index={this.state.currentIndex} title="编辑"  />
@@ -914,15 +1270,19 @@ class DlgImport extends React.Component{
   }
   upload=()=>{
     const file = this.fileUpload.files[0];
-    console.log(file);
-    var data1=new FormData();
-    data1.append("file",file);
-    //console.log(data1)
-    var self=this;
-    Client.postForm("/rest/standard",data1,function(res){
-        const newFoods = update(self.state.packs, {$push: res.result});
-        self.setState({packs: newFoods });
-    });
+    var stream = ss.createStream();
+    // upload a file to the server.
+    ss(socket).emit('file', stream, {name:file.name,size: file.size});
+    ss.createBlobReadStream(file).pipe(stream);
+    // console.log(file);
+    // var data1=new FormData();
+    // data1.append("file",file);
+    // //console.log(data1)
+    // var self=this;
+    // Client.post("/standard",data1,function(res){
+    //     const newFoods = update(self.state.packs, {$push: res.result});
+    //     self.setState({packs: newFoods });
+    // });
   }
   open=()=>{
     var self=this;
@@ -979,7 +1339,49 @@ class DlgStat extends React.Component {
       values:[],
       baoxiang:"%",
   }
-
+  componentDidMount=()=> {
+    console.log(this.myChart);
+    return;
+  }
+  draw=(node)=>{
+var ctx=node.getContext('2d');    
+var myChart = new Chart(ctx, {
+    type: 'bar',
+    data: {
+        labels: ["Red", "Blue", "Yellow", "Green", "Purple", "Orange"],
+        datasets: [{
+            label: '# of Votes',
+            data: [12, 19, 3, 5, 2, 3],
+            backgroundColor: [
+                'rgba(255, 99, 132, 0.2)',
+                'rgba(54, 162, 235, 0.2)',
+                'rgba(255, 206, 86, 0.2)',
+                'rgba(75, 192, 192, 0.2)',
+                'rgba(153, 102, 255, 0.2)',
+                'rgba(255, 159, 64, 0.2)'
+            ],
+            borderColor: [
+                'rgba(255,99,132,1)',
+                'rgba(54, 162, 235, 1)',
+                'rgba(255, 206, 86, 1)',
+                'rgba(75, 192, 192, 1)',
+                'rgba(153, 102, 255, 1)',
+                'rgba(255, 159, 64, 1)'
+            ],
+            borderWidth: 1
+        }]
+    },
+    options: {
+        scales: {
+            yAxes: [{
+                ticks: {
+                    beginAtZero:true
+                }
+            }]
+        }
+    }
+});
+  }
   close=()=>{
     this.setState({ showModal: false });
   }
@@ -989,8 +1391,11 @@ class DlgStat extends React.Component {
   }
   loaddata=(baoxiang)=>{
    var self=this;
-   var data= { limit:10,search:"xls",baoxiang:baoxiang};
-   Client.get("/rest/month12",data, function(result){
+   var data= {baoxiang:baoxiang};
+   Client.get("/month12",data, function(result){
+      console.log("month12============================");
+      console.log(result);
+      console.log("===================");
           self.setState({lbls:result.lbls,values:result.values});
    })
   }
@@ -1034,26 +1439,22 @@ logChange=(val)=> {
           }
       }
     return (
-        <NavItem eventKey={6} href="#" onClick={this.open}>统计
-        <Modal show={this.state.showModal} onHide={this.close}  dialogClassName="custom-modal">
-          <Modal.Header closeButton>
+        <NavItem ref="navitem" eventKey={6} href="#" onClick={this.open}>统计
+        <Modal ref="modal" show={this.state.showModal} onHide={this.close}  dialogClassName="custom-modal">
+          <Modal.Header ref="header" closeButton>
             <Modal.Title>统计</Modal.Title>
           </Modal.Header>
-          <Modal.Body>
+          <Modal.Body ref="body">
+         <DropdownButton ref="drop" title={this.state.baoxiang} id="id_dropdown2">
+            <MenuItem onSelect={() => this.onSelectBaoxiang("马红权")}>马红权</MenuItem>
+            <MenuItem onSelect={() => this.onSelectBaoxiang("陈旺")}>陈旺</MenuItem>
+            <MenuItem onSelect={() => this.onSelectBaoxiang("吴振宁")}>吴振宁</MenuItem>
+            <MenuItem onSelect={() => this.onSelectBaoxiang("%")}>*</MenuItem>
+          </DropdownButton>
           {
-          // <Select
-          //     name="form-field-name"
-          //     value={this.state.baoxiang}
-          //     options={[
-          //     { value: '马红权', label: '马红权' },
-          //     { value: '陈旺', label: '陈旺' },
-          //     { value: '吴振宁', label: '吴振宁' },
-          //     { value: '%', label: '*' }
-          //   ]}
-          //     onChange={this.logChange}
-          //   />
+          //<canvas ref={(input) => { this.myChart = input; }} id="myChart" width="400" height="400"></canvas>
           }
-          <Bar data={data} options={options} width={600} height={300} />
+            <Bar data={data} options={options} width={600} height={300} />
           </Modal.Body>
         </Modal>
         </NavItem>
@@ -1099,7 +1500,6 @@ class DlgCopyPack  extends React.Component{
    auto_select=(event,data) => {
       console.log("selected");
       console.log(data)
-      this.addrow(data.suggestion.id);
       this.src_id=data.suggestion.id;
       //this.setState({ auto_items: [ item ] })
   }
@@ -1246,7 +1646,8 @@ class DlgItems extends React.Component {
     this.setState({start_input:e.target.value});
   };
   mapfunc=(contact, idx) => {
-      if (contact.image==="")
+      //console.log(contact);
+      if (contact.img ==null || contact.image==="" )
         return (<tr key={idx} >
           <td>{contact.id}</td>
           <td>{contact.bh}</td>
@@ -1760,6 +2161,7 @@ class App extends React.Component {
     start:0,
     total:0,
     search:"",
+    baoxiang:"",
     start_input:1,
     currentIndex:null,
   }
@@ -1865,6 +2267,7 @@ class App extends React.Component {
   };
   onSelectBaoxiang=(e) => {
     this.mystate.baoxiang=e;
+    this.setState({baoxiang:e});
     this.load_data();
   }
   auto_change=(event, value)=>{
@@ -1998,8 +2401,8 @@ class App extends React.Component {
    <td>
         <DlgImport/>
   </td>
-   <td>
-    <DropdownButton title="过滤" id="id_dropdown2">
+   <td>过滤:
+    <DropdownButton title={this.state.baoxiang} id="id_dropdown2">
       <MenuItem onSelect={() => this.onSelectBaoxiang("马红权")}>马红权</MenuItem>
       <MenuItem onSelect={() => this.onSelectBaoxiang("陈旺")}>陈旺</MenuItem>
       <MenuItem onSelect={() => this.onSelectBaoxiang("吴振宁")}>吴振宁</MenuItem>

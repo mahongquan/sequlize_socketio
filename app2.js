@@ -3,7 +3,19 @@ var static = require('./node-static');
 var file = new static.Server('./public');
 var debug = require('debug')('express-example');
 var models = require("./models");
-
+var ss = require('socket.io-stream');
+var path = require('path');
+var fs=require('fs')
+function DateStr(date) {
+    var year = date.getFullYear();
+    var month = date.getMonth() + 1;
+    var s_month=""+month;
+    if (s_month.length<2) s_month="0"+s_month;
+    var day = date.getDate();
+    var s_day=""+day;
+    if (s_day.length<2) s_day="0"+s_day;
+    return year + "-" + s_month + "-" + s_day ;
+}
 models.sequelize.sync().then(
 	function () {
 		console.log("listen");
@@ -23,7 +35,59 @@ models.sequelize.sync().then(
 			 * When a player enters a room
 			 * @param object table-data
 			 */
-			 //Contact//////////////////////////////////////////////////////////////////////
+ss(socket).on('file', function(stream, data) {
+	console.log(data);
+	var p=path.join(__dirname, 'media');
+    p=path.join(p, data.name);
+    var ls=fs.createWriteStream(p);
+	ls.on('close', () => {
+	  console.log('closed');
+	});
+    stream.pipe(ls);
+  });       
+socket.on('/post/standard', async function( data, callback ) {
+	console.log("/post/standard");
+	console.log(data);
+	callback({
+		success:true,
+		data:[],
+		message: "delete Contact ok"
+	});
+
+}); 
+socket.on('/get/month12', async function( data, callback ) {
+    var baoxiang=data.baoxiang;
+   	var end_date=new Date();
+    var start_date=new Date();//datetime.datetime(end_date.year-1,1,1,0,0,0)
+    start_date.setYear(start_date.getYear()-1);
+    start_date.setMonth(1);
+    start_date.setDate(1);
+
+    // cursor = connection.cursor()            #获得一个游标(cursor)对象
+    // #更新操作
+    var start_date_s= DateStr(start_date);
+    var end_date_s= DateStr(end_date);
+    if (baoxiang==null)
+         cmd="select strftime('%Y-%m',tiaoshi_date) as month,count(id) as ct  from parts_contact  where tiaoshi_date between '"+start_date_s+"' and '"+end_date_s+"' group by month"
+    else
+         cmd="select strftime('%Y-%m',tiaoshi_date) as month,count(id) as ct from parts_contact  where baoxiang like '"+baoxiang+"'  and tiaoshi_date between '"+start_date_s+"' and '"+end_date_s+"' group by month"            
+    var cursor=await models.sequelize.query(cmd)
+    console.log(cursor[0]);
+    // logging.info(cmd)
+    // cursor.execute(cmd)    #执行sql语句
+    // raw = cursor.fetchall()                 #返回结果行 或使用 #raw = cursor.fetchall()		
+    var lbls=[];
+    var values=[]
+    for (var i in cursor[0])				 
+    {
+    	lbls.push(cursor[0][i].month)
+    	values.push(cursor[0][i].ct)
+    }
+	callback({
+		success:true,lbls:lbls,values:values,
+		message: "delete Contact ok"
+	});
+});
 //route.delete('/rest/Contact/:contact_id', async function(ctx,next) {
 socket.on('/delete/Contact', async function( data, callback ) {	
 	var contact = await models.Contact.findById(data.contact_id); //.then(function(packitem) {
@@ -254,8 +318,7 @@ socket.on('/post/PackItem', async function( data, callback ) {
 });
 //route.put('/rest/PackItem/:id',async  function(ctx,next) {
 socket.on('/put/PackItem', async function( data, callback ) {				
-	console.log("/put/PackItem");
-	console.log(data);
+	console.log(data.id);
 	var packitem = await models.PackItem.findById(data.id, {
 		include: [{
 			model: models.Item,
@@ -282,7 +345,9 @@ socket.on('/put/PackItem', async function( data, callback ) {
 // 	};
 // }));
 //route.get('/rest/PackItem', async function(ctx,next) {
-socket.on('/get/PackItem', async function( data, callback ) {				
+socket.on('/get/PackItem', async function( data, callback ) {	
+	console.log("/get/PackItem");			
+	console.log(data);
 	var start = data.start;
 	var limit = data.limit;
 	let search="";

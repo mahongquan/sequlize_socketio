@@ -15,8 +15,9 @@ function runAsync(){
     });
     return p;            
 }
-runAsync().then(function(data){
-    console.log(data);
-    //后面可以用传过来的数据做些其他操作
-    //......
-});
+// runAsync().then(function(data){
+//     console.log(data);
+//     //后面可以用传过来的数据做些其他操作
+//     //......
+// });
+console.log(new Date())
