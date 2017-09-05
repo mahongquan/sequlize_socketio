@@ -3,16 +3,16 @@ var XLSX = require('xlsx');
 var csv = require('csv');
 var fs=require('fs');
 var models = require("./models");
-function readStandardFile(fc,filename){
+function readStandardFile(fc,filename,callback){
     var book = XLSX.read(fc, {type:"buffer"})
     const sheetNames = book.SheetNames; 
     const table0 = book.Sheets[sheetNames[0]]
     var table = XLSX.utils.sheet_to_csv(table0)
     csv.parse(table, function(err, data){
-        readArr(data,filename);
+        readArr(data,filename,callback);
     });
 }
-function readArr(lines,filename){
+function readArr(lines,filename,callback){
     //console.log(lines)
     var nrows=lines.length
     var begin=false;
@@ -50,34 +50,17 @@ function readArr(lines,filename){
             rs.push(r)
         }
     }
-    todb(rs)
+    todb(rs,callback)
     return rs
 }    
-function  todb(rs) {
+function  todb(rs,callback) {
     console.log("todb")
     for(var i in rs){
         var r=rs[i];
-        todbOne(r)
+        todbOne(r,callback)
     }
 }
-// async function  getOrCreateItem(item) {
-//     console.log(item);
-//     var w = {
-//             name: item.name
-//             };
-//     var datas = await models.Item.findAll({
-//         where: w
-//     })
-//     console.log(datas)
-//     if (datas.length>0){//find
-//         return datas[0];
-//     }    
-//     else{
-//         var rec = await models.Item.create(item);
-//         return rec;
-//     }
-// }
-async function  todbOne(r) {
+async function  todbOne(r,callback) {
     // body...
     console.log(r);
     var w = {
@@ -93,6 +76,7 @@ async function  todbOne(r) {
     }
     else{
         pack = await models.Pack.create(r);
+        callback({result:[{id:pack.id,name:pack.name}]})
     }
     for(var i in r.items){
         //console.log(r.items[i])
@@ -144,9 +128,10 @@ function treatOne(rows,fn){
     }
     return r
 }
-models.sequelize.sync().then(
-    ()=>{
-        var fc=fs.readFileSync("./2017.6.16标钢入库.xls")
-        readStandardFile(fc,"2017.6.16标钢入库.xls");
-    }
-)
+// models.sequelize.sync().then(
+//     ()=>{
+//         var fc=fs.readFileSync("./2017.6.16标钢入库.xls")
+//         readStandardFile(fc,"2017.6.16标钢入库.xls");
+//     }
+// )
+module.exports = readStandardFile;

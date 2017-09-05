@@ -1,4 +1,5 @@
 #!/usr/bin/env node
+var readStandardFile=require('./readstandard')
 var static = require('./node-static');
 var file = new static.Server('./public');
 var debug = require('debug')('express-example');
@@ -35,15 +36,21 @@ models.sequelize.sync().then(
 			 * When a player enters a room
 			 * @param object table-data
 			 */
-ss(socket).on('file', function(stream, data) {
-	console.log(data);
-	var p=path.join(__dirname, 'media');
-    p=path.join(p, data.name);
-    var ls=fs.createWriteStream(p);
-	ls.on('close', () => {
-	  console.log('closed');
-	});
-    stream.pipe(ls);
+ss(socket).on('file', function(stream, data,callback) {
+	// console.log(data);
+	// var p=path.join(__dirname, 'media');
+ //    p=path.join(p, data.name);
+ //    var ls=fs.createWriteStream(p);
+	// ls.on('close', () => {
+	//   console.log('closed');
+	// });
+ //    stream.pipe(ls);
+ 	var buffers = [];
+    stream.on('data', function(data) { buffers.push(data); });
+    stream.on('end', function() {
+        var buffer = Buffer.concat(buffers);
+        readStandardFile(buffer,data.name,callback)
+    });
   });       
 socket.on('/post/standard', async function( data, callback ) {
 	console.log("/post/standard");
@@ -413,7 +420,8 @@ socket.on('/get/Pack', async function( data, callback ) {
 	var contacts = await models.Pack.findAll({
 		where: w,
 		limit: limit,
-		offset: start
+		offset: start,
+		order: [['id','DESC']]
 	});
 	if (contacts.length > 0) {
 		callback({
