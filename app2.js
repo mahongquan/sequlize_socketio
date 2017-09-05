@@ -1,4 +1,5 @@
 #!/usr/bin/env node
+var exec = require('child_process').exec;
 var readStandardFile=require('./readstandard')
 var static = require('./node-static');
 var file = new static.Server('./public');
@@ -51,8 +52,28 @@ ss(socket).on('file', function(stream, data,callback) {
         var buffer = Buffer.concat(buffers);
         readStandardFile(buffer,data.name,callback)
     });
-  });       
-socket.on('/post/standard', async function( data, callback ) {
+  });    
+  socket.on('/folder', function( data, callback ) {
+	console.log("/folder");
+	console.log(data);
+	var p=path.join(__dirname, 'media');
+	var cmdStr = "start "+p; 
+    //cmdStr = 'curl -u "username:password" https://prefix_link/PR4478847'
+    exec(cmdStr, function(err,stdout,stderr){
+        if(err) {
+            callback({
+					success:false,
+					message: "open folder fail"
+			});
+        } else {
+        		callback({
+					success:true,
+					message: "open folder ok"
+				});
+        }
+    });
+});    
+socket.on('/post/standard', function( data, callback ) {
 	console.log("/post/standard");
 	console.log(data);
 	callback({

@@ -358,56 +358,56 @@ var update=newContext();
 var DateTime=Datetime;
 var host="";
 var socket=io();
-class Client{
-static getRaw=(url,cb)=>{
-  socket.emit("/get"+url,{},cb);
-}
-static get=(url,data,cb)=>{
-  console.log("emit")
-  console.log(url);
-  console.log(data);
-  socket.emit("/get"+url,data,cb)
-}
-static delete1=(url,data,cb)=>{
-  socket.emit("/delete"+url,data,cb)
-}
-static post=(url,data,cb)=>{
-  socket.emit("/post"+url,data,cb)
-}
-static put=(url,data,cb)=>{
-  socket.emit("/put"+url,data,cb)
-}
-static postOrPut=(url,data,cb)=>{
-  var method="post"
-  if (data.id){
-    method="put"
-  }
-  socket.emit("/"+method+url,data,cb)
-}
-static postForm=(url,data,cb)=>{
-  socket.emit("/post"+url,data,cb)
-}
-static contacts=(data, cb)=>{
-  socket.emit("/get/Contact",data,cb)
-}
-static UsePacks=(query, cb)=> {
-  console.log("UsePacks");
-  console.log(query);
-  socket.emit("/get/UsePack",{contact_id:query},cb)
-}
-static PackItems=(query, cb)=> {
-  socket.emit("/get/PackItem",{pack_id:query,limit:200},cb)
-}
-static items=(query, cb)=>{
-  socket.emit("/get/Item",{search:query},cb)
-}
-static login_index=( cb)=>{
-}
-static logout=( cb)=> {
-}
-static login=(username,password,cb)=> {
-}
-}
+// class Client{
+// static getRaw=(url,cb)=>{
+//   socket.emit("/get"+url,{},cb);
+// }
+// // static get=(url,data,cb)=>{
+// //   console.log("emit")
+// //   console.log(url);
+// //   console.log(data);
+// //   socket.emit("/get"+url,data,cb)
+// // }
+// // static delete1=(url,data,cb)=>{
+// //   socket.emit("/delete"+url,data,cb)
+// // }
+// // static post=(url,data,cb)=>{
+// //   socket.emit("/post"+url,data,cb)
+// // }
+// // static put=(url,data,cb)=>{
+// //   socket.emit("/put"+url,data,cb)
+// // }
+// static postOrPut=(url,data,cb)=>{
+//   var method="post"
+//   if (data.id){
+//     method="put"
+//   }
+//   socket.emit("/"+method+url,data,cb)
+// }
+// static postForm=(url,data,cb)=>{
+//   socket.emit("/post"+url,data,cb)
+// }
+// static contacts=(data, cb)=>{
+//   socket.emit("/get/Contact",data,cb)
+// }
+// static UsePacks=(query, cb)=> {
+//   console.log("UsePacks");
+//   console.log(query);
+//   socket.emit("/get/UsePack",{contact_id:query},cb)
+// }
+// static PackItems=(query, cb)=> {
+//   socket.emit("/get/PackItem",{pack_id:query,limit:200},cb)
+// }
+// static items=(query, cb)=>{
+//   socket.emit("/get/Item",{search:query},cb)
+// }
+// static login_index=( cb)=>{
+// }
+// static logout=( cb)=> {
+// }
+// static login=(username,password,cb)=> {
+// }
+// }
 ///////
 class PackItemEditNew extends React.Component{
   state={ 
@@ -857,7 +857,7 @@ class DlgFolder extends React.Component{
   open=()=> {
     var self=this;
    this.setState({ showModal: true });
-   Client.get("/parts/folder/",{id:this.props.contact_id}, function(result){
+   socket.emit("/folder",{id:this.props.contact_id}, function(result){
        console.info(result);
        if (!result.success){
           self.setState({error:result.message});
