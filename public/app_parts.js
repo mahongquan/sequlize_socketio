@@ -902,7 +902,7 @@ class DlgCheck extends React.Component{
     data1.append("id",this.props.contact_id);
     //console.log(data1)
     var self=this;
-    Client.postForm("/rest/check",data1,function(data){
+    socket.emit("/check",data1,function(data){
       var showdata=[];
       var left=data.result[0];
       var notequal=data.result[1];
@@ -1016,7 +1016,7 @@ class DlgWait extends React.Component{
   open=()=> {
     var self=this;
    this.setState({ showModal: true });
-   Client.get("/parts/allfile",{id:this.props.contact_id}, function(result){
+   socket.emit("/allfile",{id:this.props.contact_id}, function(result){
        console.info(result);
        if (!result.success){
           self.setState({error:result.message});
@@ -1055,7 +1055,7 @@ class DlgUrl extends React.Component{
   open=()=>{
    var self=this;
    this.setState({ showModal: true });
-   Client.get(this.props.url,this.props.data, function(result){
+   socket.emit(this.props.url,this.props.data, function(result){
        console.info(result);
        if (!result.success){
           self.setState({error:result.message});
@@ -1484,10 +1484,10 @@ class DlgCopyPack  extends React.Component{
   copy_pack=()=>{
     console.log(this.src_id+" "+this.state.newname);
     var self=this;
-    var data1=new FormData();
-    data1.append("oldid",this.src_id);
-    data1.append("newname",this.state.newname);
-    Client.postForm("/rest/copypack/",data1,(result) => {
+    var data1={};
+    data1.oldid=this.src_id;
+    data1.newname=this.state.newname;
+    socket.emit("/copypack/",data1,(result) => {
           self.setState({ error:result.message})
     });
   }
@@ -1942,8 +1942,15 @@ class ContactEdit2New  extends React.Component{
      this.setState({hiddenPacks:true});
   }
   handleSave=(data)=>{
-    var url="/Contact";
-    Client.postOrPut(url,this.state.contact,(res) => {
+
+    let url;//="/Contact";
+    if (this.state.contact.id){
+      url="/put/Contact";
+    }
+    else{
+      url="/post/Contact";
+    }
+    socket.emit(url,this.state.contact,(res) => {
       if(res.success){
         this.setState({contact:res.data});
         this.parent.handleContactChange(this.index,res.data);
