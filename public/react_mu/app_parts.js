@@ -2874,4 +2874,21 @@ class App extends React.Component {
     );
   }
 }
-ReactDOM.render(<App />, document.getElementById('app'));
+injectTapEventPlugin();
+var {TextField, RaisedButton,Popover,Menu,MenuItem,MuiThemeProvider,Toolbar, ToolbarGroup, ToolbarTitle,Table, TableBody, TableHeader, TableHeaderColumn, TableRow, TableRowColumn}=ReactMu
+class AppTest extends React.Component {
+  state={
+    searchValue:""
+  }
+  handleSearchChange=()=>{
+
+  }
+  render() {
+    return (
+      <MuiThemeProvider>
+      <TextField></TextField>
+      </MuiThemeProvider>
+    );
+  }
+}
+ReactDOM.render(<AppTest />, document.getElementById('app'));
