@@ -1,5 +1,410 @@
+var {Table,Modal,Navbar,Nav,NavItem,DropdownButton,MenuItem}=ReactBootstrap;
+var update=newContext();
+var DateTime=Datetime;
+var host="";
+var socket=io();
 var isEqual=_.isEqual;// from 'lodash/isEqual';
 var find=_.find;// import find from 'lodash/find';
+var {ContextMenuTrigger,ContextMenu}=ReactContextMenu;
+//Browser///////////////////////////////////////////////////////
+
+
+function buildUploadUrl(path, name) {
+        return "/fs/upload?path="+path+"&name="+name;
+}
+
+function buildMkdirUrl(path, name) {
+        return "/fs/mkdir?path="+path+"&name="+name;
+}
+
+
+function getParent(path, onSuccess) {
+    socket.emit("/fs/parent",{path:path}, onSuccess);
+}
+
+class File extends React.Component {
+
+    glyphClass=()=>{
+            var className = "glyphicon ";
+            className += this.props.isdir ? "glyphicon-folder-open" : "glyphicon-file";
+            return className;
+    }
+
+
+
+    remove=()=> {
+            socket.emit("/fs/remove",{path:path},
+              ()=>{this.props.browser.reloadFilesFromServer();}
+            );
+    }
+
+    rename=(updatedName)=> {
+            socket.emit("/fs/rename2",
+              {path:this.props.path,name:updatedName},
+              ()=>{this.props.browser.reloadFilesFromServer();}
+            );
+    }
+
+    onRemove=(e,data)=>{
+            console.log("onRemove");
+            var type = this.props.isdir ? "folder" : "file";
+            var remove =window.confirm("Remove "+type +" '"+ this.props.path +"' ?");
+            if (remove)
+                    this.remove();
+    }
+
+    onRename=(e,data)=>{
+            console.log("onRename");
+            var type = this.props.isdir ? "folder" : "file";
+            var updatedName = prompt("Enter new name for "+type +" "+this.props.name);
+            if (updatedName != null)
+                    this.rename(updatedName);
+    }
+
+    renderList=()=>{
+            var dateString =  new Date(this.props.time*1000).toLocaleString();//toGMTString()
+            var glyphClass = this.glyphClass();
+            return (<tr id={this.props.id} ref={this.props.path}>
+                            <td>
+                            <ContextMenuTrigger id={""+this.props.id}>
+                            <a onClick={this.props.onClick}><span style={{fontSize:"1.5em", paddingRight:"10px"}} className={glyphClass}/>{this.props.name}</a>
+                            </ContextMenuTrigger>
+                            <ContextMenu id={""+this.props.id}>
+                                <MenuItem data={{a:1}} onClick={this.onRemove}>删除</MenuItem>
+                                <MenuItem data={{a:2}} onClick={this.onRename}>重命名</MenuItem>
+                              </ContextMenu>
+                            </td>
+                            <td>{File.sizeString(this.props.size)}</td>
+                            <td>{dateString}</td>
+                            </tr>);
+    }
+    renderGrid=()=>{
+            var glyphClass = this.glyphClass();
+            return (
+                <div ref={this.props.path} >
+                    <ContextMenuTrigger id={""+this.props.id}>
+                        <a id={this.props.id} onClick={this.props.onClick}>
+                        <span style={{fontSize:"3.5em"}} className={glyphClass}/>
+                        </a>
+                    </ContextMenuTrigger>
+                                            <ContextMenu id={""+this.props.id}>
+                        <MenuItem data={{a:1}} onClick={this.onRemove}>remove</MenuItem>
+                        <MenuItem data={{a:2}} onClick={this.onRename}>rename</MenuItem>
+                    </ContextMenu>
+
+                    <h4 >{this.props.name}</h4>
+
+                </div>);
+    }
+
+    render=()=>{
+            return this.props.gridView ? this.renderGrid() : this.renderList();
+    }
+    static id = ()=>{return (Math.pow(2,31) * Math.random())|0; }
+
+    static timeSort =(left, right)=>{return left.time - right.time;}
+
+    static sizeSort = (left, right)=>{return left.size - right.size;}
+
+    static pathSort = (left, right)=>{return left.path.localeCompare(right.path);}
+
+    static sizes = [{count : 1, unit:"bytes"}, {count : 1024, unit: "kB"}, {count: 1048576 , unit : "MB"}, {count: 1073741824, unit:"GB" } ]
+
+    static sizeString = (sizeBytes)=>{
+        var iUnit=0;
+        var count=0;
+        for (iUnit=0; iUnit < File.sizes.length;iUnit++) {
+                count = sizeBytes / File.sizes[iUnit].count;
+                if (count < 1024)
+                        break;
+        }
+        return "" + (count|0) +" "+ File.sizes[iUnit].unit;
+    }
+};
+class  Browser extends React.Component {
+     state= {
+              paths : ["."],
+              files: [],
+              sort: File.pathSort,
+              gridView: false,
+              current_path:"",
+              displayUpload:"none",
+          }
+
+    loadFilesFromServer=(path)=>{
+        var self=this;
+            socket.emit("/fs/children",{path:path},
+              (data)=>{
+                    var files = data.children.sort(self.state.sort);
+                    var paths = self.state.paths;
+                    if (paths[paths.length-1] !== path)
+                    paths = paths.concat([path])
+                    self.setState(
+                            {files: files,
+                                    paths: paths,
+                            sort: self.state.sort,
+                            gridView: self.state.gridView});
+                    self.updateNavbarPath(self.currentPath());
+              }
+            );
+    }
+    updateNavbarPath=(path)=>{
+         // var elem  = document.getElementById("pathSpan");
+        // elem.innerHTML = '<span class="glyphicon glyphicon-chevron-right"/>' +path;
+        this.setState({current_path:path});
+
+    }
+    reloadFilesFromServer=()=> {
+        this.loadFilesFromServer(this.currentPath())
+    }
+
+    currentPath =()=>{
+            return this.state.paths[this.state.paths.length-1]
+    }
+
+    onBack =()=>{
+            if (this.state.paths.length <2) {
+                    alert("Cannot go back from "+ this.currentPath());
+                    return;
+            }
+            var paths2=this.state.paths.slice(0,-1);
+            this.setState({paths:paths2});
+            this.loadFilesFromServer(paths2[paths2.length-1])
+    }
+
+    onUpload=()=>{
+            this.setState({displayUpload:""});
+    }
+
+    onParent=()=>{
+            var onSuccess = function(data) {
+                    var parentPath = data.path;
+                    this.updatePath(parentPath);
+            }.bind(this);
+            getParent(this.currentPath(), onSuccess);
+    }
+
+    alternateView=()=>{
+            var updatedView = !  this.state.gridView;
+
+            this.setState(
+              {
+                    gridView: updatedView
+              });
+    }
+
+
+    uploadFile=()=>{
+        var path = this.currentPath();
+        var readFile = evt.target.files[0];
+        var name = readFile.name;
+        console.log(readFile);
+        socket.emit("/fs/upload",{},()=>{});
+        // var formData = new FormData();
+        // formData.append("file", readFile, name);
+
+        // var xhr = new XMLHttpRequest();
+        // xhr.open('POST', buildUploadUrl(path, name) , true);
+        // xhr.onreadystatechange=function()
+        // {
+        //         if (xhr.readyState !== 4)
+        //                 return;
+
+        //         if (xhr.status === 200){
+        //                 alert("Successfully uploaded file "+ name +" to "+ path);
+        //                 this.reloadFilesFromServer();
+        //         }
+        //         else
+        //                ;// console.log(request.status);
+        // }.bind(this);
+        // xhr.send(formData);
+    }
+
+
+    componentDidMount=()=>{
+        console.log("mount======");
+        console.log(this.props.initpath);
+        if (this.props.initpath)
+            this.state.paths.push(this.props.initpath);
+        var path = this.currentPath();
+        this.loadFilesFromServer(path);
+    }
+
+    updateSort=(sort)=>{
+            var files  = this.state.files
+                    var lastSort = this.state.sort;
+            if  (lastSort === sort)
+                    files = files.reverse();
+            else
+                    files = files.sort(sort);
+
+            this.setState({files: files, sort: sort,  paths: this.state.paths, gridView: this.state.gridView});
+    }
+
+    timeSort=()=>{
+            this.updateSort(File.timeSort);
+    }
+    pathSort=()=>{
+            this.updateSort(File.pathSort);
+    }
+    sizeSort=()=>{
+            this.updateSort(File.sizeSort);
+    }
+    updatePath=(path)=>{
+            this.loadFilesFromServer(path);
+    }
+    getContent=(path)=>{
+        console.log("getContent");
+        var url ="/media/"+path;
+        console.log(url);
+        window.open(url, url, 'height=800,width=800,resizable=yes,scrollbars=yes');
+    }
+
+    mkdir=()=>{
+
+            var newFolderName = prompt("Enter new folder name");
+            if (newFolderName == null)
+                    return;
+            socket.emit(
+              buildMkdirUrl(this.currentPath(),newFolderName),
+              this.reloadFilesFromServer
+            );
+    }
+    onClick=(f)=>{
+        console.log("onClick");
+        console.log(f);
+        if (f.isdir){
+          this.updatePath(f.path);
+        }
+        else{
+           this.getContent(f.path);
+        }
+    }
+    mapfunc=(f, idx)=>{
+      var id  =  File.id(f.name);
+      return (<File key={idx}  id={id} gridView={this.state.gridView} onClick={()=>this.onClick(f)} 
+      path={f.path} name={f.name} isdir={f.isdir} size={f.size} time={f.time} browser={this}
+      />)
+    }
+    render=()=>{
+        const files = this.state.files.map(this.mapfunc);
+
+            var gridGlyph = "glyphicon glyphicon-th-large";
+            var listGlyph = "glyphicon glyphicon-list";
+            var className = this.state.gridView ? listGlyph : gridGlyph;
+            var toolbar=(<div>
+            <nav className="navbar navbar-inverse ">
+                        <div className="navbar-header">
+                                <button type="button" className="navbar-toggle" data-toggle="collapse" data-target="#example-navbar-collapse">
+                                        <span className="sr-only">Toggle navigation</span>
+                                        <span className="icon-bar"></span>
+                                        <span className="icon-bar"></span>
+                                        <span className="icon-bar"></span>
+                                </button>
+                        </div>
+                        <div className="collapse navbar-collapse" id="example-navbar-collapse">
+                                <ul className="nav navbar-nav">
+                                        <li id="backButton"><a onClick={this.onBack}><span className="glyphicon glyphicon-arrow-left"/></a></li>
+                                        <li id="parentButton"><a onClick={this.onParent} ><span className="glyphicon glyphicon-arrow-up"/></a></li>
+                                        <li id="uploadButton"><a onClick={this.onUpload} ><span className="glyphicon glyphicon-upload"/></a></li>
+                                        <li id="mkdirButton"><a onClick={this.mkdir} ><span className="glyphicon glyphicon-folder-open"/></a></li>
+                                        <li id="alternateViewButton"><a onClick={this.alternateView}>
+                                       <span ref="altViewSpan" className={className} />
+                                        </a></li>
+                                        <li><a id="pathSpan"><span className="glyphicon glyphicon-chevron-right"/>{this.state.current_path}</a></li>
+                                </ul>
+                        </div>
+                </nav>
+    <input type="file" id="uploadInput" onChange={this.uploadFile()} style={{display:this.state.displayUpload}} /></div>);
+            if (this.state.gridView)
+            {
+                var files2=[];
+                var row=[]
+                var ncols=3
+                for(var i in files){
+                    if (i % ncols ===0)
+                    {
+                        if (row.length>0){
+                            files2.push(row)
+                            row=[]
+                            row.push(files[i]);
+                        }
+                        else{
+                            row.push(files[i]);   
+                        }
+                    }
+                    else{
+                        row.push(files[i]);
+                    }
+                }
+                if(row.length>0){files2.push(row)}
+                var files2_t=[]
+                for(i in files2){
+                    var cols=[]
+                    for(var j in files2[i]){
+                        cols.push((<td key={j} >{files2[i][j]}</td>))
+                    }
+                    row=(<tr key={i}>{cols}</tr>);
+                    files2_t.push(row);
+                }
+                return (<div>
+                {toolbar}
+                <table>
+                <tbody>{files2_t}
+                </tbody>
+                </table>
+                </div>);
+
+            }
+            else{
+              var sortGlyph = "glyphicon glyphicon-sort";
+              return (<div>
+                              {toolbar}
+                              <table className="table table-responsive table-striped table-hover">
+                              <thead><tr>
+                              <th><button onClick={this.pathSort} className="btn btn-default"><span className={sortGlyph}/>名称</button></th>
+                              <th><button onClick={this.sizeSort} className="btn btn-default"><span className={sortGlyph}/>大小</button></th>
+                              <th><button onClick={this.timeSort} className="btn btn-default"><span className={sortGlyph}/>修改日期</button></th>
+                              </tr></thead>
+                              <tbody>
+                              {files}
+                              </tbody>
+                              </table>
+
+                </div>)
+            }
+    }
+}
+/////////////
+class DlgFolder2 extends React.Component{
+  state={ 
+      showModal: false,
+      hiddenPacks:true,
+      error:"",
+    }
+  close=()=>{
+    this.setState({ showModal: false });
+  }
+
+  open=()=>{
+   this.setState({ showModal: true });
+  }
+  render=()=>{
+    return (
+        <button onClick={this.open}>{this.props.title}
+        <Modal show={this.state.showModal} onHide={this.close}  dialogClassName="custom-modal">
+          <Modal.Header closeButton>
+            <Modal.Title>文件浏览</Modal.Title>
+          </Modal.Header>
+          <Modal.Body>
+          <Browser initpath={this.props.initpath}/> 
+          </Modal.Body>
+        </Modal>
+        </button>
+    );
+  }
+}
+//////////////react-Chart////////////////////////////
 class ChartComponent extends React.Component {
   static getLabelAsKey = d => d.label;
   static propTypes = {
@@ -352,62 +757,6 @@ class Scatter extends React.Component {
     );
   }
 }
-//////////////
-var {Table,Modal,Navbar,Nav,NavItem,DropdownButton,MenuItem}=ReactBootstrap;
-var update=newContext();
-var DateTime=Datetime;
-var host="";
-var socket=io();
-// class Client{
-// static getRaw=(url,cb)=>{
-//   socket.emit("/get"+url,{},cb);
-// }
-// // static get=(url,data,cb)=>{
-// //   console.log("emit")
-// //   console.log(url);
-// //   console.log(data);
-// //   socket.emit("/get"+url,data,cb)
-// // }
-// // static delete1=(url,data,cb)=>{
-// //   socket.emit("/delete"+url,data,cb)
-// // }
-// // static post=(url,data,cb)=>{
-// //   socket.emit("/post"+url,data,cb)
-// // }
-// // static put=(url,data,cb)=>{
-// //   socket.emit("/put"+url,data,cb)
-// // }
-// static postOrPut=(url,data,cb)=>{
-//   var method="post"
-//   if (data.id){
-//     method="put"
-//   }
-//   socket.emit("/"+method+url,data,cb)
-// }
-// static postForm=(url,data,cb)=>{
-//   socket.emit("/post"+url,data,cb)
-// }
-// static contacts=(data, cb)=>{
-//   socket.emit("/get/Contact",data,cb)
-// }
-// static UsePacks=(query, cb)=> {
-//   console.log("UsePacks");
-//   console.log(query);
-//   socket.emit("/get/UsePack",{contact_id:query},cb)
-// }
-// static PackItems=(query, cb)=> {
-//   socket.emit("/get/PackItem",{pack_id:query,limit:200},cb)
-// }
-// static items=(query, cb)=>{
-//   socket.emit("/get/Item",{search:query},cb)
-// }
-// static login_index=( cb)=>{
-// }
-// static logout=( cb)=> {
-// }
-// static login=(username,password,cb)=> {
-// }
-// }
 ///////
 class PackItemEditNew extends React.Component{
   state={ 
@@ -1347,45 +1696,6 @@ class DlgStat extends React.Component {
     console.log(this.myChart);
     return;
   }
-  draw=(node)=>{
-var ctx=node.getContext('2d');    
-var myChart = new Chart(ctx, {
-    type: 'bar',
-    data: {
-        labels: ["Red", "Blue", "Yellow", "Green", "Purple", "Orange"],
-        datasets: [{
-            label: '# of Votes',
-            data: [12, 19, 3, 5, 2, 3],
-            backgroundColor: [
-                'rgba(255, 99, 132, 0.2)',
-                'rgba(54, 162, 235, 0.2)',
-                'rgba(255, 206, 86, 0.2)',
-                'rgba(75, 192, 192, 0.2)',
-                'rgba(153, 102, 255, 0.2)',
-                'rgba(255, 159, 64, 0.2)'
-            ],
-            borderColor: [
-                'rgba(255,99,132,1)',
-                'rgba(54, 162, 235, 1)',
-                'rgba(255, 206, 86, 1)',
-                'rgba(75, 192, 192, 1)',
-                'rgba(153, 102, 255, 1)',
-                'rgba(255, 159, 64, 1)'
-            ],
-            borderWidth: 1
-        }]
-    },
-    options: {
-        scales: {
-            yAxes: [{
-                ticks: {
-                    beginAtZero:true
-                }
-            }]
-        }
-    }
-});
-  }
   close=()=>{
     this.setState({ showModal: false });
   }
@@ -1407,17 +1717,17 @@ var myChart = new Chart(ctx, {
     this.setState({baoxiang:baoxiang});
     this.loaddata(baoxiang);
   }
-logChange=(val)=> {
-  console.log("Selected: " + JSON.stringify(val));
-  if (val!=null){
-      this.setState({baoxiang:val.value});
-      this.loaddata(val.value);
+  logChange=(val)=> {
+    console.log("Selected: " + JSON.stringify(val));
+    if (val!=null){
+        this.setState({baoxiang:val.value});
+        this.loaddata(val.value);
+    }
+    else{
+       this.setState({baoxiang:"%"});
+        this.loaddata("%"); 
+    }
   }
-  else{
-     this.setState({baoxiang:"%"});
-      this.loaddata("%"); 
-  }
-}
   render=()=>{
     var bg=[];//values.length);
     for(var i=0;i<this.state.values.length;i++){
@@ -1521,7 +1831,7 @@ class DlgCopyPack  extends React.Component{
   render=()=>{
     return (
         <NavItem eventKey={5} href="#" onClick={this.open}>复制包
-        <Modal show={this.state.showModal} onHide={this.close}  dialogClassName="custom-modal">
+        <Modal show={this.state.showModal} onHide={this.close}>
           <Modal.Header closeButton>
             <Modal.Title>复制包</Modal.Title>
           </Modal.Header>
@@ -1951,6 +2261,7 @@ class ContactEdit2New  extends React.Component{
       url="/post/Contact";
     }
     socket.emit(url,this.state.contact,(res) => {
+      console.log(res);
       if(res.success){
         this.setState({contact:res.data});
         this.parent.handleContactChange(this.index,res.data);
@@ -2393,7 +2704,9 @@ class App extends React.Component {
 
   onDetailClick=(contactid)=>{
     console.log(contactid);
-    window.open(host+"/parts/showcontact/?id="+contactid, "detail", 'height=800,width=800,resizable=yes,scrollbars=yes');
+    socket.emit("/parts/showcontact",{id:contactid},(data)=>{
+        console.log(data);
+    });
   }
   handleNext = (e) => {
     this.mystate.start=this.mystate.start+this.mystate.limit;
@@ -2461,16 +2774,13 @@ class App extends React.Component {
         <td>{contact.method}</td>
         <td>
         <div className="btn-group" role="group">
-        <a className="contact_detail" data={contact.id} onClick={() => this.onDetailClick(contact.id)}>详细</a>
+         <a className="contact_detail" data={contact.id} onClick={() => this.onDetailClick(contact.id)}>详细</a>
          <DlgUrl url="/rest/updateMethod" parent={this} index={idx} data={{id:contact.id}} title="更新方法" />
          <DlgWait contact_id={contact.id} title="全部文件" />
          <DlgCheck contact_id={contact.id} title="核对备料计划" />
-        <DlgFolder contact_id={contact.id} title="资料文件夹" />
-    
-    { 
-      //<DlgFolder2 contact_id={contact.id} initpath={"仪器资料/"+contact.yiqibh} title="资料文件夹2" />
-    }
-                </div>
+         <DlgFolder contact_id={contact.id} title="资料文件夹" />
+         <DlgFolder2 contact_id={contact.id} initpath={"仪器资料/"+contact.yiqibh} title="资料文件夹2" />
+         </div>
         </td>
       </tr>
     ));
@@ -2503,47 +2813,47 @@ class App extends React.Component {
     <div align="center" style={{display:this.state.connect_error?"":"none",textAlign: "center",color:"red"}} >!!!!!!!!!!连接错误!!!!!!!</div>
     <ContactEdit2New ref="contactedit" parent={this}   index={this.state.currentIndex} title="编辑"  />
     <Navbar className="navbar-inverse">
-    <Navbar.Header>
-      <Navbar.Brand>
-        <a>装箱单</a>
-      </Navbar.Brand>
-    </Navbar.Header>
-    <Nav>
-      <NavItem eventKey={1} href="#">合同</NavItem>
-      <DlgPacks />
-      <DlgItems />
-      <DlgCopyPack />
-      <DlgStat />
-    </Nav>
-  </Navbar>
+      <Navbar.Header>
+        <Navbar.Brand>
+          <a>装箱单</a>
+        </Navbar.Brand>
+      </Navbar.Header>
+      <Nav>
+        <NavItem eventKey={1} href="#">合同</NavItem>
+        <DlgPacks />
+        <DlgItems />
+        <DlgCopyPack />
+        <DlgStat />
+      </Nav>
+    </Navbar>
     <table>
     <tbody>
     <tr>
-   <td>
-   {
-     // <DropdownButton title={this.state.user} id="id_dropdown1">
-     //    <li hidden={this.state.user!=="AnonymousUser"}>
-     //      <ExampleModal onLoginSubmit={this.onLoginSubmit} title="登录" />
-     //    </li>
-     //    <li  hidden={this.state.user==="AnonymousUser"} >
-     //      <a onClick={this.handleLogout}>注销</a>
-     //    </li>
-     // </DropdownButton>
-   }
-  </td>
-  <td>
-        <input type="text" value={this.state.search}  placeholder="合同 or 仪器编号" onChange={this.handleSearchChange} />
-        <button id="id_bt_search" className="btm btn-info" onClick={this.search}>搜索
-        <span className="glyphicon glyphicon-search" aria-hidden="true"></span>
-        </button>
-  </td>
-  <td>
-       <button className="btn btn-primary" onClick={()=>this.handleEdit(null)}>新仪器</button>
-  </td>
-   <td>
-        <DlgImport/>
-  </td>
-   <td>过滤:
+       <td>
+       {
+         // <DropdownButton title={this.state.user} id="id_dropdown1">
+         //    <li hidden={this.state.user!=="AnonymousUser"}>
+         //      <ExampleModal onLoginSubmit={this.onLoginSubmit} title="登录" />
+         //    </li>
+         //    <li  hidden={this.state.user==="AnonymousUser"} >
+         //      <a onClick={this.handleLogout}>注销</a>
+         //    </li>
+         // </DropdownButton>
+       }
+      </td>
+    <td>
+          <input type="text" value={this.state.search}  placeholder="合同 or 仪器编号" onChange={this.handleSearchChange} />
+          <button id="id_bt_search" className="btm btn-info" onClick={this.search}>搜索
+          <span className="glyphicon glyphicon-search" aria-hidden="true"></span>
+          </button>
+    </td>
+    <td>
+         <button className="btn btn-primary" onClick={()=>this.handleEdit(null)}>新仪器</button>
+    </td>
+     <td>
+          <DlgImport/>
+    </td>
+    <td>过滤:
     <DropdownButton title={this.state.baoxiang} id="id_dropdown2">
       <MenuItem onSelect={() => this.onSelectBaoxiang("马红权")}>马红权</MenuItem>
       <MenuItem onSelect={() => this.onSelectBaoxiang("陈旺")}>陈旺</MenuItem>
@@ -2553,11 +2863,11 @@ class App extends React.Component {
   </td>
   </tr>
   </tbody>
- </table>
-<table className="table-bordered"><thead><tr><th>ID</th><th>用户单位</th><th>客户地址</th><th>通道配置</th><th>仪器型号</th><th>仪器编号</th><th>包箱</th><th>审核</th>
-<th>入库时间</th><th>调试时间</th><th>合同编号</th><th>方法</th><th>操作</th></tr></thead><tbody id="contact-list">{contactRows}</tbody>
-</table>{prev}
-<label id="page">{this.state.start+1}../{this.state.total}</label>{next}
+  </table>
+  <table className="table-bordered"><thead><tr><th>ID</th><th>用户单位</th><th>客户地址</th><th>通道配置</th><th>仪器型号</th><th>仪器编号</th><th>包箱</th><th>审核</th>
+  <th>入库时间</th><th>调试时间</th><th>合同编号</th><th>方法</th><th>操作</th></tr></thead><tbody id="contact-list">{contactRows}</tbody>
+  </table>{prev}
+  <label id="page">{this.state.start+1}../{this.state.total}</label>{next}
       <input maxLength="6" size="6" onChange={this.handlePageChange} value={this.state.start_input} />
       <button id="page_go"  className="btn btn-info" onClick={this.jump}>跳转</button>
   </div>
