@@ -353,7 +353,7 @@ class Scatter extends React.Component {
   }
 }
 //////////////
-var {Table,Modal,Navbar,Nav,NavItem,DropdownButton,MenuItem}=ReactBootstrap;
+var {Button,Table,Modal,Navbar,Nav,NavItem,DropdownButton,MenuItem}=ReactBootstrap;
 var update=newContext();
 var DateTime=Datetime;
 var host="";
@@ -522,7 +522,7 @@ class PackItemEditNew extends React.Component{
       item=this.state.packitem.Item;
     }
     return (
-        <Modal show={this.state.showModal} onHide={this.close}>
+        <Modal show={this.state.showModal}  onHide={this.close}>
           <Modal.Header closeButton>
             <Modal.Title>编辑备件信息</Modal.Title>
           </Modal.Header>
@@ -640,13 +640,22 @@ class PackItems extends React.Component {
     console.log("auto_change");
     if (value.length>1)
     {
-      socket.emit("/get/Item",{search:value} ,(items) => {
+      socket.emit("/get/Item",{search:value,limit:30} ,(items) => {
           this.setState({ auto_items: items.data, auto_loading: false })
       });
     }
   };
   new_packitem= (id) => {
     var data={danwei:"",bh:"",guige:"",ct:0,img:"",name:this.state.newPackName,pack_id:this.props.pack_id};
+    console.log(data);
+    socket.emit("/post/PackItemEx",data,(res) => {
+        var p=res.data;
+        const newFoods = this.state.items.concat(p);
+        this.setState({ items: newFoods });
+    });
+  };
+  new_packitem2=()=> {
+    var data={danwei:"",bh:"",guige:"",ct:0,img:"",name:this.state.auto_value,pack_id:this.props.pack_id};
     console.log(data);
     socket.emit("/post/PackItemEx",data,(res) => {
         var p=res.data;
@@ -709,6 +718,19 @@ class PackItems extends React.Component {
         </td>
       </tr>
     ));
+    let button1;
+    if (this.state.auto_value.length>1){
+	    	button1=(
+		    <Button onClick={this.new_packitem2}>
+		        新备件
+		        </Button>);	
+    }
+    else{
+    	button1=(
+		    <Button disabled onClick={this.new_packitem2}>
+		        新备件
+		        </Button>);
+    }
     return (
     <div>
         <Table  responsive bordered condensed>
@@ -728,7 +750,9 @@ class PackItems extends React.Component {
             {itemRows}
           </tbody>
         </Table>
-        输入备件<Autosuggest
+        <table><tbody><tr>
+        <td>输入备件</td><td><Autosuggest
+        focusInputOnSuggestionClick={false}
           inputProps={{ id: 'states-autocomplete',value:this.state.auto_value,onChange:this.onChange}}
           onSuggestionSelected={this.auto_select}
           onSuggestionsFetchRequested={this.auto_change}
@@ -743,11 +767,7 @@ class PackItems extends React.Component {
               id={item.id}
             >{item.bh+"_"+item.name+"_"+item.guige}</div>
           )}
-        />
-      <p>新备件名称：
-        <input id="new_pack1"  placeholder="新备件" value={this.state.newPackName} onChange={this.newpackChange}/>
-        <button className="btn btn-info" id="id_new_item" onClick={this.new_packitem}>新备件</button>
-      </p>
+        /></td><td>{button1}</td></tr></tbody></table>
       <PackItemEditNew ref="dlg" parent={this} />
       </div>
     );
@@ -1132,7 +1152,7 @@ class UsePacks2 extends React.Component {
   };
   new_pack= (id) => {
     var url="/UsePackEx";
-    var data={"name":this.state.newPackName,contact_id:this.props.contact_id};
+    var data={"name":this.state.auto_value,contact_id:this.props.contact_id};
     socket.emit("/post/UsePackEx",data,(res) => {
         var p=res.data;
         const newFoods = this.state.usepacks.concat(p);
@@ -1208,8 +1228,21 @@ class UsePacks2 extends React.Component {
         </td>
       </tr>
     ));
-    console.log("UsePacks2 render===================");
-    console.log(this.state);
+    //console.log("UsePacks2 render===================");
+    //console.log(this.state);
+    let button1;
+    if (this.state.auto_value.length>1){
+	    	button1=(
+		    <Button onClick={this.new_pack}>
+		        新包
+		        </Button>);	
+    }
+    else{
+    	button1=(
+		    <Button disabled onClick={this.new_pack}>
+		        新包
+		        </Button>);
+    }
     return (
     <div>
         <UsePackEditNew ref="edit1" parent={this} index={this.state.currentIndex} title="编辑"  />
@@ -1228,8 +1261,9 @@ class UsePacks2 extends React.Component {
             {usepackRows}
           </tbody>
         </Table>
-        <div>
-        输入包<Autosuggest
+        <table><tbody><tr><td>输入包</td>
+        <td><Autosuggest
+        focusInputOnSuggestionClick={false}
           inputProps={{ id: 'states-autocomplete',value:this.state.auto_value,onChange:this.onChange}}
           onSuggestionSelected={this.auto_select}
           onSuggestionsFetchRequested={this.auto_change}
@@ -1244,13 +1278,8 @@ class UsePacks2 extends React.Component {
               id={item.id}
             >{item.name}</div>
           )}
-        />
-          <button  className="btn" onClick={this.bibei}>必备</button>
-        </div>
-      <div>新包名称：
-        <input id="new_pack1"  placeholder="新包" value={this.state.newPackName} onChange={this.newpackChange}/>
-        <button className="btn btn-info" id="id_new_usepack" onClick={this.new_pack}>新包</button>
-      </div>
+        /></td><td>{button1}</td><td><button  className="btn" onClick={this.bibei}>必备</button></td>
+       </tr></tbody></table>
       </div>
     );
   }
