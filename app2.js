@@ -116,6 +116,13 @@ socket.on('/get/month12', async function( data, callback ) {
 		message: "delete Contact ok"
 	});
 });
+socket.on('/parts/showcontact', async function( data, callback ) {	
+	var contact = await models.Contact.findById(data.id); //.then(function(packitem) {
+	callback({
+		data: contact,
+		message: "show  Contact ok"
+	});
+}); //delete
 //route.delete('/rest/Contact/:contact_id', async function(ctx,next) {
 socket.on('/delete/Contact', async function( data, callback ) {	
 	var contact = await models.Contact.findById(data.contact_id); //.then(function(packitem) {
@@ -129,6 +136,7 @@ socket.on('/delete/Contact', async function( data, callback ) {
 socket.on('/post/Contact', async function( data, callback ) {		
 	var contact =await models.Contact.create(data)
 	callback({
+		success:true,
 		data: contact,
 		message: "create Contact ok"
 	});
