@@ -5,7 +5,7 @@ var host="";
 var socket=io();
 var isEqual=_.isEqual;// from 'lodash/isEqual';
 var find=_.find;// import find from 'lodash/find';
-var {ContextMenuTrigger,ContextMenu}=ReactContextMenu;
+//var {ContextMenuTrigger,ContextMenu}=ReactContextMenu;
 //Browser///////////////////////////////////////////////////////
 
 
