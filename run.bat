@@ -1,1 +1,1 @@
-..\node app2.js
+..\..\node app2.js

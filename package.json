@@ -1,19 +1,25 @@
 {
-  "name": "express-example",
-  "version": "0.0.0",
+  "name": "sequlize_socketio",
+  "version": "0.1.0",
   "private": true,
   "scripts": {
     "dev": "next",
     "build": "next build",
-    "start": "next start",
+    "start": "node app2",
     "starts": "node ./bin/www",
     "test": "npm run test-unit && npm run test-integration",
     "test-unit": "mocha test/unit/*.test.js",
     "test-integration": "mocha test/integration/*.test.js"
   },
   "dependencies": {
+    "mime":"^2.2.0",
     "react": "^15.6.1",
-    "react-dom": "^15.6.1"
+    "react-dom": "^15.6.1",
+    "socket.io": "^2.0.3",
+    "socket.io-client": "^2.0.3",
+    "socket.io-stream":"^0.9.1",
+    "sequelize": "^3.3.2",
+    "sqlite3": "^3.1.9"
   },
   "devDependencies": {}
 }
