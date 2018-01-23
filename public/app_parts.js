@@ -1,27 +1,20 @@
-var {Table,Modal,Navbar,Nav,NavItem,DropdownButton,MenuItem}=ReactBootstrap;
+var {Button,Table,Modal,Navbar,Nav,NavItem,DropdownButton,MenuItem}=ReactBootstrap;
 var update=newContext();
 var DateTime=Datetime;
 var host="";
 var socket=io();
 var isEqual=_.isEqual;// from 'lodash/isEqual';
 var find=_.find;// import find from 'lodash/find';
-//var {ContextMenuTrigger,ContextMenu}=ReactContextMenu;
 //Browser///////////////////////////////////////////////////////
-
-
 function buildUploadUrl(path, name) {
         return "/fs/upload?path="+path+"&name="+name;
 }
-
 function buildMkdirUrl(path, name) {
         return "/fs/mkdir?path="+path+"&name="+name;
 }
-
-
 function getParent(path, onSuccess) {
     socket.emit("/fs/parent",{path:path}, onSuccess);
 }
-
 class File extends React.Component {
 
     glyphClass=()=>{
@@ -46,7 +39,7 @@ class File extends React.Component {
     }
 
     onRemove=(e,data)=>{
-            console.log("onRemove");
+            //console.log("onRemove");
             var type = this.props.isdir ? "folder" : "file";
             var remove =window.confirm("Remove "+type +" '"+ this.props.path +"' ?");
             if (remove)
@@ -54,7 +47,7 @@ class File extends React.Component {
     }
 
     onRename=(e,data)=>{
-            console.log("onRename");
+            //console.log("onRename");
             var type = this.props.isdir ? "folder" : "file";
             var updatedName = prompt("Enter new name for "+type +" "+this.props.name);
             if (updatedName != null)
@@ -122,7 +115,7 @@ class File extends React.Component {
     }
 };
 class  Browser extends React.Component {
-     state= {
+    state= {
               paths : ["."],
               files: [],
               sort: File.pathSort,
@@ -198,7 +191,7 @@ class  Browser extends React.Component {
         var path = this.currentPath();
         var readFile = evt.target.files[0];
         var name = readFile.name;
-        console.log(readFile);
+        //console.log(readFile);
         socket.emit("/fs/upload",{},()=>{});
         // var formData = new FormData();
         // formData.append("file", readFile, name);
@@ -215,15 +208,15 @@ class  Browser extends React.Component {
         //                 this.reloadFilesFromServer();
         //         }
         //         else
-        //                ;// console.log(request.status);
+        //                ;// //console.log(request.status);
         // }.bind(this);
         // xhr.send(formData);
     }
 
 
     componentDidMount=()=>{
-        console.log("mount======");
-        console.log(this.props.initpath);
+        //console.log("mount======");
+        //console.log(this.props.initpath);
         if (this.props.initpath)
             this.state.paths.push(this.props.initpath);
         var path = this.currentPath();
@@ -254,9 +247,9 @@ class  Browser extends React.Component {
             this.loadFilesFromServer(path);
     }
     getContent=(path)=>{
-        console.log("getContent");
+        //console.log("getContent");
         var url ="/media/"+path;
-        console.log(url);
+        //console.log(url);
         window.open(url, url, 'height=800,width=800,resizable=yes,scrollbars=yes');
     }
 
@@ -271,8 +264,8 @@ class  Browser extends React.Component {
             );
     }
     onClick=(f)=>{
-        console.log("onClick");
-        console.log(f);
+        //console.log("onClick");
+        //console.log(f);
         if (f.isdir){
           this.updatePath(f.path);
         }
@@ -755,62 +748,7 @@ class Scatter extends React.Component {
     );
   }
 }
-//////////////
-var {Button,Table,Modal,Navbar,Nav,NavItem,DropdownButton,MenuItem}=ReactBootstrap;
-var update=newContext();
-var DateTime=Datetime;
-var host="";
-var socket=io();
-// class Client{
-// static getRaw=(url,cb)=>{
-//   socket.emit("/get"+url,{},cb);
-// }
-// // static get=(url,data,cb)=>{
-// //   console.log("emit")
-// //   console.log(url);
-// //   console.log(data);
-// //   socket.emit("/get"+url,data,cb)
-// // }
-// // static delete1=(url,data,cb)=>{
-// //   socket.emit("/delete"+url,data,cb)
-// // }
-// // static post=(url,data,cb)=>{
-// //   socket.emit("/post"+url,data,cb)
-// // }
-// // static put=(url,data,cb)=>{
-// //   socket.emit("/put"+url,data,cb)
-// // }
-// static postOrPut=(url,data,cb)=>{
-//   var method="post"
-//   if (data.id){
-//     method="put"
-//   }
-//   socket.emit("/"+method+url,data,cb)
-// }
-// static postForm=(url,data,cb)=>{
-//   socket.emit("/post"+url,data,cb)
-// }
-// static contacts=(data, cb)=>{
-//   socket.emit("/get/Contact",data,cb)
-// }
-// static UsePacks=(query, cb)=> {
-//   console.log("UsePacks");
-//   console.log(query);
-//   socket.emit("/get/UsePack",{contact_id:query},cb)
-// }
-// static PackItems=(query, cb)=> {
-//   socket.emit("/get/PackItem",{pack_id:query,limit:200},cb)
-// }
-// static items=(query, cb)=>{
-//   socket.emit("/get/Item",{search:query},cb)
-// }
-// static login_index=( cb)=>{
-// }
-// static logout=( cb)=> {
-// }
-// static login=(username,password,cb)=> {
-// }
-// }
+///////////////////////////////////////////////////////////////////////////////////////////////
 ///////
 class PackItemEditNew extends React.Component{
   state={ 
@@ -849,8 +787,8 @@ class PackItemEditNew extends React.Component{
   }
   handleSave=(data)=>{
     socket.emit("/put/PackItem",this.state.packitem,(res) => {
-      console.log("/put/PackItem");
-      console.log(res);
+      //console.log("/put/PackItem");
+      //console.log(res);
         this.setState({contact:res.data});
         this.parent.handlePackItemChange(this.index,res.data);
         this.old=res.data;
@@ -870,53 +808,53 @@ class PackItemEditNew extends React.Component{
       this.setState({bg:bg2}); 
     }
     const contact2=update(this.state.packitem,{quehuo: {$set:quehuo}});
-    console.log(contact2);
+    //console.log(contact2);
     this.setState({packitem:contact2});
   }
   handleChange_item=(e)=>{
-    console.log("change");
-    console.log(e);
-    console.log(e.target);
-    console.log(e.target.value);
-    console.log(e.target.name);
+    //console.log("change");
+    //console.log(e);
+    //console.log(e.target);
+    //console.log(e.target.value);
+    //console.log(e.target.name);
     if(this.old.Item[e.target.name]===e.target.value)
     {
       const bg2=update(this.state.bg,{[e.target.name]:{$set:"#ffffff"}})
       //this.state.bg[e_target_name]="#ffffff";
-      //console.log("equal");
+      ////console.log("equal");
       this.setState({bg:bg2});
     }
     else{
        const bg2=update(this.state.bg,{[e.target.name]:{$set:"#8888ff"}})
       //this.state.bg[e_target_name]="#ffffff";
-      //console.log("equal");
+      ////console.log("equal");
       this.setState({bg:bg2}); 
     }
     const contact2=update(this.state.packitem,{Item:{[e.target.name]: {$set:e.target.value}}});
-    console.log(contact2);
+    //console.log(contact2);
     this.setState({packitem:contact2});
   }
   handleChange=(e)=>{
-    console.log("change");
-    console.log(e);
-    console.log(e.target);
-    console.log(e.target.value);
-    console.log(e.target.name);
+    //console.log("change");
+    //console.log(e);
+    //console.log(e.target);
+    //console.log(e.target.value);
+    //console.log(e.target.name);
     if(this.old[e.target.name]===e.target.value)
     {
       const bg2=update(this.state.bg,{[e.target.name]:{$set:"#ffffff"}})
       //this.state.bg[e_target_name]="#ffffff";
-      //console.log("equal");
+      ////console.log("equal");
       this.setState({bg:bg2});
     }
     else{
        const bg2=update(this.state.bg,{[e.target.name]:{$set:"#8888ff"}})
       //this.state.bg[e_target_name]="#ffffff";
-      //console.log("equal");
+      ////console.log("equal");
       this.setState({bg:bg2}); 
     }
     const contact2=update(this.state.packitem,{[e.target.name]: {$set:e.target.value}});
-    console.log(contact2);
+    //console.log(contact2);
     this.setState({packitem:contact2});
   }
   render=()=>{
@@ -1023,24 +961,24 @@ class PackItems extends React.Component {
     release:true,
   };
   componentDidMount=()=> {
-      console.log(this.props.pack_id);
+      //console.log(this.props.pack_id);
       socket.emit("/get/PackItem",{pack_id:this.props.pack_id}, (items) => {
-        console.log("PackItems componentDidMount");
-        console.log(items);
+        //console.log("PackItems componentDidMount");
+        //console.log(items);
         this.setState({
           items: items.data,//.slice(0, MATCHING_ITEM_LIMIT),
         });
       });
   };
   auto_select=(event,data) => {
-      console.log("selected");
-      console.log(data)
+      //console.log("selected");
+      //console.log(data)
       this.addrow(data.suggestion.id);
       //this.setState({auto_value:value, auto_items: [ item ] })
   }
   auto_change=(data)=>{
     var value=data.value;
-    console.log("auto_change");
+    //console.log("auto_change");
     if (value.length>1)
     {
       socket.emit("/get/Item",{search:value,limit:30} ,(items) => {
@@ -1050,7 +988,7 @@ class PackItems extends React.Component {
   };
   new_packitem= (id) => {
     var data={danwei:"",bh:"",guige:"",ct:0,img:"",name:this.state.newPackName,pack_id:this.props.pack_id};
-    console.log(data);
+    //console.log(data);
     socket.emit("/post/PackItemEx",data,(res) => {
         var p=res.data;
         const newFoods = this.state.items.concat(p);
@@ -1059,7 +997,7 @@ class PackItems extends React.Component {
   };
   new_packitem2=()=> {
     var data={danwei:"",bh:"",guige:"",ct:0,img:"",name:this.state.auto_value,pack_id:this.props.pack_id};
-    console.log(data);
+    //console.log(data);
     socket.emit("/post/PackItemEx",data,(res) => {
         var p=res.data;
         const newFoods = this.state.items.concat(p);
@@ -1067,9 +1005,9 @@ class PackItems extends React.Component {
     });
   };
   handlePackItemChange = (idx,contact) => {
-    console.log(idx);
+    //console.log(idx);
     const contacts2=update(this.state.items,{[idx]: {$set:contact}});
-    console.log(contacts2);
+    //console.log(contacts2);
     this.setState({items:contacts2});
   };
   addrow=(item_id)=>{
@@ -1099,12 +1037,12 @@ class PackItems extends React.Component {
     this.refs.dlg.open2(idx);
   }
   onChange=(event, { newValue })=>{
-    console.log(newValue);
+    //console.log(newValue);
     this.setState({auto_value:newValue});
   }
   render() {
-    console.log("render");
-    console.log(this.state);
+    //console.log("render");
+    //console.log(this.state);
     const { items } = this.state;
     const itemRows = items.map((item, idx) => (
       <tr key={idx}>
@@ -1163,12 +1101,8 @@ class PackItems extends React.Component {
           getSuggestionValue={(item) => item.name}
           ref="autocomplete"
           suggestions={this.state.auto_items}
-          renderSuggestion={(item, isHighlighted) => (
-            <div
-              style={isHighlighted ? styles.highlightedItem : styles.item}
-              key={item.id}
-              id={item.id}
-            >{item.bh+"_"+item.name+"_"+item.guige}</div>
+          renderSuggestion={(item) => (
+            <span>{item.bh}<b><i>{item.name}</i></b>{item.guige}</span>
           )}
         /></td><td>{button1}</td></tr></tbody></table>
       <PackItemEditNew ref="dlg" parent={this} />
@@ -1214,7 +1148,7 @@ class UsePackEditNew extends React.Component{
       this.old=this.parent.state.usepacks[this.index];
     }
     this.setState({usepack:this.old});
-    console.log(this.old);
+    //console.log(this.old);
   }
   // open=()=>{
   //   this.setState({ showModal: true });
@@ -1317,18 +1251,18 @@ class DlgCheck extends React.Component{
   }
   upload=()=>{
     const file = this.fileUpload.files[0];
-    console.log(file);
+    //console.log(file);
     var data1=new FormData();
     data1.append("file",file);
     data1.append("id",this.props.contact_id);
-    //console.log(data1)
+    ////console.log(data1)
     var self=this;
     socket.emit("/check",data1,function(data){
       var showdata=[];
       var left=data.result[0];
       var notequal=data.result[1];
       var right=data.result[2];
-      console.log(notequal);
+      //console.log(notequal);
       var n=left.length;
       if (n<right.length){
         n=right.length;
@@ -1370,7 +1304,7 @@ class DlgCheck extends React.Component{
           }
         showdata.push(tr);
       }
-      console.log(showdata);
+      //console.log(showdata);
       self.setState({packs: showdata});
       self.setState({hideTable:false});
     });
@@ -1513,7 +1447,7 @@ class UsePacks2 extends React.Component {
   }
   load_data=(contact_id)=>{
       socket.emit("/get/UsePack",{contact_id:contact_id}, (usepacks) => {
-        console.log(usepacks)
+        //console.log(usepacks)
         this.setState({
           usepacks: usepacks.data,//.slice(0, MATCHING_ITEM_LIMIT),
         });
@@ -1534,15 +1468,15 @@ class UsePacks2 extends React.Component {
     }
   };
   auto_select=(event,data) => {
-      console.log("selected");
-      console.log(data)
+      //console.log("selected");
+      //console.log(data)
       this.addrow(data.suggestion.id);
       //this.setState({auto_value:value, auto_items: [ item ] })
   }
   bibei= (id) => {
     //this.setState({auto_value:"必备"});
     this.onChange(null,{newValue:"必备"});
-    console.log(this.refs.autocomplete);
+    //console.log(this.refs.autocomplete);
 
   };
   new_pack= (id) => {
@@ -1582,8 +1516,8 @@ class UsePacks2 extends React.Component {
     this.refs.edit1.open2(idx);
   }
   getUsers=(input)=> {
-    console.log("getUsers");
-    console.log(input)
+    //console.log("getUsers");
+    //console.log(input)
     if (!input) {
       return Promise.resolve({ options: [] });
     }
@@ -1592,19 +1526,19 @@ class UsePacks2 extends React.Component {
     .then((response) => response.json())
     .then((json) => {
       var r={ options: json.data};
-      console.log(r);
+      //console.log(r);
       return r;
     });
   }
   onChange=(event, { newValue })=>{
-    console.log("onChange======================");
-    console.log(newValue)
+    //console.log("onChange======================");
+    //console.log(newValue)
     this.setState({
       auto_value: newValue,
     });
   }
   onValueClick=(value)=>{
-    console.log(value);
+    //console.log(value);
   }
   render() {
     const { usepacks } = this.state;
@@ -1623,8 +1557,8 @@ class UsePacks2 extends React.Component {
         </td>
       </tr>
     ));
-    //console.log("UsePacks2 render===================");
-    //console.log(this.state);
+    ////console.log("UsePacks2 render===================");
+    ////console.log(this.state);
     let button1;
     if (this.state.auto_value.length>1){
 	    	button1=(
@@ -1666,14 +1600,12 @@ class UsePacks2 extends React.Component {
           getSuggestionValue={(item) => item.name}
           ref="autocomplete"
           suggestions={this.state.auto_items}
-          renderSuggestion={(item, isHighlighted) => (
-            <div
-              style={isHighlighted ? styles.highlightedItem : styles.item}
-              key={item.id}
-              id={item.id}
-            >{item.name}</div>
+          renderSuggestion={(item) => (
+                        <span>{item.name}</span>
           )}
-        /></td><td>{button1}</td><td><button  className="btn" onClick={this.bibei}>必备</button></td>
+        /></td>
+        <td><button  className="btn" onClick={this.bibei}>必备</button></td>
+        <td>{button1}</td>
        </tr></tbody></table>
       </div>
     );
@@ -1696,16 +1628,16 @@ class DlgImport extends React.Component{
     // upload a file to the server.
     var app=this;
     ss(socket).emit('file', stream, {name:file.name,size: file.size},(res)=>{
-       console.log(app.state.packs)
-       console.log(res);
+       //console.log(app.state.packs)
+       //console.log(res);
        const newFoods = update(app.state.packs, {$push: res.result});
        app.setState({packs: newFoods });
     });
     ss.createBlobReadStream(file).pipe(stream);
-    // console.log(file);
+    // //console.log(file);
     // var data1=new FormData();
     // data1.append("file",file);
-    // //console.log(data1)
+    // ////console.log(data1)
     // var self=this;
     // Client.post("/standard",data1,function(res){
     //     const newFoods = update(self.state.packs, {$push: res.result});
@@ -1723,7 +1655,7 @@ class DlgImport extends React.Component{
        // }
        // else
           self.setState({packs:result.data});
-          console.log(result.data);
+          //console.log(result.data);
    })
   }
   render=()=>{
@@ -1766,7 +1698,7 @@ class DlgStat extends React.Component {
       baoxiang:"%",
   }
   componentDidMount=()=> {
-    console.log(this.myChart);
+    //console.log(this.myChart);
     return;
   }
   close=()=>{
@@ -1780,9 +1712,9 @@ class DlgStat extends React.Component {
    var self=this;
    var data= {baoxiang:baoxiang};
    socket.emit("/get/month12",data, function(result){
-      console.log("month12============================");
-      console.log(result);
-      console.log("===================");
+      //console.log("month12============================");
+      //console.log(result);
+      //console.log("===================");
           self.setState({lbls:result.lbls,values:result.values});
    })
   }
@@ -1791,7 +1723,7 @@ class DlgStat extends React.Component {
     this.loaddata(baoxiang);
   }
   logChange=(val)=> {
-    console.log("Selected: " + JSON.stringify(val));
+    //console.log("Selected: " + JSON.stringify(val));
     if (val!=null){
         this.setState({baoxiang:val.value});
         this.loaddata(val.value);
@@ -1815,7 +1747,7 @@ class DlgStat extends React.Component {
               borderWidth:2
           }]
       };
-      console.log(data);
+      //console.log(data);
       var options= {
           scales: {
               yAxes: [{
@@ -1863,7 +1795,7 @@ class DlgCopyPack  extends React.Component{
     this.setState({newname:event.target.value});
   }
   copy_pack=()=>{
-    console.log(this.src_id+" "+this.state.newname);
+    //console.log(this.src_id+" "+this.state.newname);
     var self=this;
     var data1={};
     data1.oldid=this.src_id;
@@ -1874,7 +1806,7 @@ class DlgCopyPack  extends React.Component{
   }
   auto_change=(data)=>{
     var value=data.value;
-    console.log("auto_change");
+    //console.log("auto_change");
     if (value.length>1)
     {
       socket.emit("/get/Pack",{search:value} ,(items) => {
@@ -1883,8 +1815,8 @@ class DlgCopyPack  extends React.Component{
     }
   };
    auto_select=(event,data) => {
-      console.log("selected");
-      console.log(data)
+      //console.log("selected");
+      //console.log(data)
       this.src_id=data.suggestion.id;
       //this.setState({ auto_items: [ item ] })
   }
@@ -1896,7 +1828,7 @@ class DlgCopyPack  extends React.Component{
    this.src_id=null;
   }
   onChange=(event, { newValue })=>{
-    console.log(newValue);
+    //console.log(newValue);
     this.setState({auto_value:newValue});
   }
   render=()=>{
@@ -2029,7 +1961,7 @@ class DlgPacks extends React.Component {
     this.setState({start_input:e.target.value});
   };
   mapfunc=(contact, idx) => {
-      //console.log(contact);
+      ////console.log(contact);
       if (contact.img ==null || contact.image==="" )
         return (<tr key={idx} >
           <td>{contact.id}</td>
@@ -2149,7 +2081,7 @@ class DlgItems extends React.Component {
     this.setState({start_input:e.target.value});
   };
   mapfunc=(contact, idx) => {
-      //console.log(contact);
+      ////console.log(contact);
       if (contact.img ==null || contact.image==="" )
         return (<tr key={idx} >
           <td>{contact.id}</td>
@@ -2197,23 +2129,6 @@ class DlgItems extends React.Component {
   }
 };
 //ContactEdit2New//////////////////////
-let styles = {
-  item: {
-    padding: '2px 6px',
-    cursor: 'default'
-  },
-
-  highlightedItem: {
-    color: 'white',
-    background: 'hsl(200, 50%, 50%)',
-    padding: '2px 6px',
-    cursor: 'default'
-  },
-
-  menu: {
-    border: 'solid 1px #ccc'
-  }
-}
 class ContactEdit2New  extends React.Component{
   state={ 
       showModal: false,
@@ -2275,42 +2190,20 @@ class ContactEdit2New  extends React.Component{
     }
     else{
       this.old=this.parent.state.contacts[this.index];
+      if(this.old.channels==undefined){
+        this.old.channels="";
+      }
+      if(this.old.yiqixinghao==undefined){
+        this.old.yiqixinghao="";
+      }
       this.setState({hiddenPacks:false});
     }
     this.setState({contact:this.old});
   }
-  // open=()=>{
-  //   this.setState({ showModal: true });
-  //   this.setState({bg:{}});
-  //   this.parent=this.props.parent;
-  //   if (this.index==null){
-  //     this.old={
-  //       yujifahuo_date:moment().format("YYYY-MM-DD"),
-  //       tiaoshi_date:moment().format("YYYY-MM-DD"),
-  //       addr:"",
-  //       channels:"",
-  //       baoxiang:"",
-  //       hetongbh:"",
-  //       shenhe:"",
-  //       yonghu:"",
-  //       yiqibh:"",
-  //       yiqixinghao:""
-  //     };
-  //   }
-  //   else{
-  //     this.old=this.parent.state.contacts[this.index];
-  //     this.setState({hiddenPacks:false});
-  //   }
-  //   this.setState({contact:this.old});
-  // }
-  // handleClear (data) {
-  //   console.log("clear");
-  //   var contact2={id:"",hetongbh:"",name:"",addr:""};
-  //   console.log(contact2);
-  //   this.setState({contact:contact2});
-  // },
+
   handleCopy=(data)=> {
      console.log("copy");
+     this.index=null;
      var contact2=update(this.state.contact,{id:{$set:""}});
      console.log(contact2);
      this.setState({contact:contact2});
@@ -2326,10 +2219,18 @@ class ContactEdit2New  extends React.Component{
       url="/post/Contact";
     }
     socket.emit(url,this.state.contact,(res) => {
+      
       console.log(res);
       if(res.success){
         this.setState({contact:res.data});
         this.parent.handleContactChange(this.index,res.data);
+        if(this.index){
+          //console.log("true");
+
+        }else{
+          //console.log("false");
+          this.index=0;
+        }
         this.old=res.data;
         this.setState({bg:{}});
         this.setState({hiddenPacks:false});
@@ -2342,7 +2243,7 @@ class ContactEdit2New  extends React.Component{
   tiaoshi_date_change=(value)=>{
     //this.state.yujifahuo_date=value;
     var e_target_name="tiaoshi_date";
-    console.log(this.old[e_target_name]);
+    //console.log(this.old[e_target_name]);
     var t=null;
     if (typeof value==="string")
     {
@@ -2351,31 +2252,31 @@ class ContactEdit2New  extends React.Component{
     else{
       t=value.format("YYYY-MM-DD");
     }
-    console.log(t);
+    //console.log(t);
     if(this.old[e_target_name]===t)
     {
       const bg2=update(this.state.bg,{[e_target_name]:{$set:"#ffffff"}})
       //this.state.bg[e_target_name]="#ffffff";
-      //console.log("equal");
+      ////console.log("equal");
       this.setState({bg:bg2});
     }
     else{
-      //console.log("not equal")
+      ////console.log("not equal")
       //this.state.bg[e_target_name]="#8888ff"; 
       const bg2=update(this.state.bg,{[e_target_name]:{$set:"#8888ff"}})
       //this.state.bg[e_target_name]="#ffffff";
-      //console.log("equal");
+      ////console.log("equal");
       this.setState({bg:bg2});
     }
     const contact2=update(this.state.contact,{[e_target_name]: {$set:t}});
-    console.log(contact2);
+    //console.log(contact2);
     this.setState({contact:contact2});
   }
 
   yujifahuo_date_change=(value)=>{
     //this.state.yujifahuo_date=value;
     var e_target_name="yujifahuo_date";
-    console.log(this.old[e_target_name]);
+    //console.log(this.old[e_target_name]);
     var t=null;
     if (typeof value==="string")
     {
@@ -2384,22 +2285,22 @@ class ContactEdit2New  extends React.Component{
     else{
       t=value.format("YYYY-MM-DD");
     }
-    console.log(t);
+    //console.log(t);
     if(this.old[e_target_name]===t)
     {
       const bg2=update(this.state.bg,{[e_target_name]:{$set:"#ffffff"}})
       //this.state.bg[e_target_name]="#ffffff";
-      //console.log("equal");
+      ////console.log("equal");
       this.setState({bg:bg2});
     }
     else{
      const bg2=update(this.state.bg,{[e_target_name]:{$set:"#8888ff"}})
       //this.state.bg[e_target_name]="#ffffff";
-      //console.log("equal");
+      ////console.log("equal");
       this.setState({bg:bg2});
     }
     const contact2=update(this.state.contact,{[e_target_name]: {$set:t}});
-    console.log(contact2);
+    //console.log(contact2);
     this.setState({contact:contact2});
   }
   channels_change=(event, { newValue })=>{
@@ -2410,8 +2311,8 @@ class ContactEdit2New  extends React.Component{
     this.change1(data.suggestion);
   }
   change1=(item)=>{
-      console.log("selected");
-      console.log(item);
+      //console.log("selected");
+      //console.log(item);
       if(this.old.channels===item)
       {
        const bg2=update(this.state.bg,{channels:{$set:"#ffffff"}})
@@ -2422,7 +2323,7 @@ class ContactEdit2New  extends React.Component{
         this.setState({bg:bg2});
       }
       const contact2=update(this.state.contact,{channels: {$set:item}});
-      console.log(contact2);
+      //console.log(contact2);
       this.setState({contact:contact2});
   }
   yiqixinghao_change=(event, { newValue })=>{
@@ -2432,8 +2333,8 @@ class ContactEdit2New  extends React.Component{
     this.change2(data.suggestion);
   }
   change2=(item)=>{
-      console.log("selected");
-      console.log(item);
+      //console.log("selected");
+      //console.log(item);
       if(this.old.yiqixinghao===item)
       {
        const bg2=update(this.state.bg,{yiqixinghao:{$set:"#ffffff"}})
@@ -2444,29 +2345,29 @@ class ContactEdit2New  extends React.Component{
         this.setState({bg:bg2});
       }
       const contact2=update(this.state.contact,{yiqixinghao: {$set:item}});
-      console.log(contact2);
+      //console.log(contact2);
       this.setState({contact:contact2});
   }
   handleChange=(e)=>{
-    console.log("change");
-    console.log(e);
-    console.log(e.target.value);
-    console.log(e.target.name);
+    //console.log("change");
+    //console.log(e);
+    //console.log(e.target.value);
+    //console.log(e.target.name);
     if(this.old[e.target.name]===e.target.value)
     {
      const bg2=update(this.state.bg,{[e.target.name]:{$set:"#ffffff"}})
       //this.state.bg[e_target_name]="#ffffff";
-      //console.log("equal");
+      ////console.log("equal");
       this.setState({bg:bg2});
     }
     else{
       const bg2=update(this.state.bg,{[e.target.name]:{$set:"#8888ff"}})
       //this.state.bg[e_target_name]="#ffffff";
-      //console.log("equal");
+      ////console.log("equal");
       this.setState({bg:bg2});
     }
     const contact2=update(this.state.contact,{[e.target.name]: {$set:e.target.value}});
-    console.log(contact2);
+    //console.log(contact2);
     this.setState({contact:contact2});
   }
   matchStateToTerm=(state, value)=>{
@@ -2474,7 +2375,7 @@ class ContactEdit2New  extends React.Component{
   }
   render=()=>{
     return (
-        <Modal show={this.state.showModal} onHide={this.close}  dialogClassName="custom-modal">
+        <Modal show={this.state.showModal} onHide={this.close} >
           <Modal.Header closeButton>
             <Modal.Title>编辑仪器信息</Modal.Title>
           </Modal.Header>
@@ -2529,11 +2430,8 @@ class ContactEdit2New  extends React.Component{
                       getSuggestionValue={(item) => item}
                       onSuggestionSelected={this.channels_select}
                       onSuggestionsFetchRequested={()=>{}}
-                      renderSuggestion={(item, isHighlighted) => (
-                        <div
-                          style={isHighlighted ? styles.highlightedItem : styles.item}
-                          key={item}
-                        >{item}</div>
+                      renderSuggestion={(item) => (
+                        <span>{item}</span>
                       )}
                     />
                 </td>
@@ -2568,11 +2466,8 @@ class ContactEdit2New  extends React.Component{
                       getSuggestionValue={(item) => item}
                       onSuggestionsFetchRequested={()=>{}}
                       onSuggestionSelected={this.yiqixinghao_select}
-                      renderSuggestion={(item, isHighlighted) => (
-                        <div
-                          style={isHighlighted ? styles.highlightedItem : styles.item}
-                          key={item}
-                        >{item}</div>
+                      renderSuggestion={(item) => (
+                        <span>{item}</span>
                       )}
                     />
                 }
@@ -2707,9 +2602,15 @@ class App extends React.Component {
   };
   handleContactChange = (idx,contact) => {
     console.log(idx);
-    const contacts2=update(this.state.contacts,{[idx]: {$set:contact}});
-    console.log(contacts2);
-    this.setState({contacts:contacts2});
+    let contacts2
+    if (idx!=null){
+      contacts2=update(this.state.contacts,{[idx]: {$set:contact}});
+      console.log(contacts2);
+    }
+    else{
+      contacts2=update(this.state.contacts,{$unshift: [contact]});
+    }
+    this.setState({contacts:contacts2})
   };
   handleUserChange = (user) => {
     if (user === "AnonymousUser") {
@@ -2728,9 +2629,9 @@ class App extends React.Component {
     this.load_data();
   };
   handleLogout = () => {
-    console.log("logout");
+    //console.log("logout");
     // Client.logout((data) => {
-    //   console.log("logout" + data);
+    //   //console.log("logout" + data);
     //   this.setState({
     //     logined: false,
     //     user: "AnonymousUser",
@@ -2768,9 +2669,9 @@ class App extends React.Component {
   };
 
   onDetailClick=(contactid)=>{
-    console.log(contactid);
+    //console.log(contactid);
     socket.emit("/parts/showcontact",{id:contactid},(data)=>{
-        console.log(data);
+        //console.log(data);
     });
   }
   handleNext = (e) => {
@@ -2789,7 +2690,7 @@ class App extends React.Component {
     this.load_data();
   }
   auto_change=(event, value)=>{
-    console.log("auto_change");
+    //console.log("auto_change");
     if (value.length>1)
     {
       this.setState({ auto_value:value, auto_loading: true });
@@ -2802,7 +2703,7 @@ class App extends React.Component {
     };
   }
   onLoginSubmit= (data) => {
-    console.log(data);
+    //console.log(data);
     // Client.login(data.username, data.password, (res) => {
     //   if (res.success) {
     //     this.setState({
@@ -2822,6 +2723,9 @@ class App extends React.Component {
   opendlgfolder=(contactid)=>{
    this.refs.dlgfolder.open(contactid); 
   }
+  opendlgfolder2=(contactid)=>{
+   this.refs.dlgfolder2.open(contactid); 
+  }
   opendlgcheck=(contactid,yiqibh)=>{
    this.refs.dlgcheck.open(contactid,yiqibh); 
   }
@@ -2831,6 +2735,12 @@ class App extends React.Component {
   openDlgCopyPack=()=>{
     this.refs.dlgcopypack.open();
   }
+  opendlgurl=()=>{
+    this.refs.dlgurl.open();
+  }
+  opendlgwait=()=>{
+    this.refs.dlgwait.open();
+  }
   openDlgStat=()=>{
     this.refs.dlgstat.open();
   }
@@ -2838,30 +2748,29 @@ class App extends React.Component {
     this.refs.dlgimport.open();
   }
   render() {
-    console.log("render=========================");
+    //console.log("render=========================");
     const contactRows = this.state.contacts.map((contact, idx) => (
       <tr key={idx} >
-        <td>{contact.id}</td>
+        <td>{contact.id}</td><td><b>{contact.hetongbh}</b></td>
         <td>{contact.yonghu}</td>
         <td>{contact.addr}</td>
         <td>{contact.channels}</td>
         <td>{contact.yiqixinghao}</td>
         <td>
           <a onClick={()=>this.handleEdit(idx)}>{contact.yiqibh}</a>
-          <DropdownButton title="" dropup id="id_dropdown3">
+          <DropdownButton title=""  id="id_dropdown3">
             <MenuItem onSelect={() => this.onDetailClick(contact.id)}>详细</MenuItem>
             <MenuItem onSelect={()=>this.opendlgurl("/rest/updateMethod",this,idx,{id:contact.id})}>更新方法</MenuItem>
             <MenuItem onSelect={()=>this.opendlgwait(contact.id)}>全部文件</MenuItem>
             <MenuItem onSelect={()=>this.opendlgcheck(contact.id,contact.yiqibh)}>核对备料计划</MenuItem>
             <MenuItem onSelect={()=>this.opendlgfolder(contact.id)}>资料文件夹</MenuItem>
+            <MenuItem onSelect={()=>this.opendlgfolder2(contact.id)}>资料文件夹2</MenuItem>
           </DropdownButton>
           
         </td>
         <td>{contact.baoxiang}</td>
-        <td>{contact.shenhe}</td>
         <td>{contact.yujifahuo_date}</td>
-        <td>{contact.tiaoshi_date}</td>
-        <td>{contact.hetongbh}</td>
+        
         <td>{contact.method}</td>
         
       </tr>
@@ -2870,8 +2779,8 @@ class App extends React.Component {
     var hasnext=true;
     let prev;
     let next;
-    console.log(this.mystate);
-    console.log(this.state);
+    //console.log(this.mystate);
+    //console.log(this.state);
     if(this.state.start===0){
       hasprev=false;
     }
@@ -2899,6 +2808,7 @@ class App extends React.Component {
     <DlgStat ref="dlgstat" />
     <DlgImport ref="dlgimport" />
     <DlgCheck ref="dlgcheck" />
+    <DlgFolder2 ref="dlgfolder2" />
     <DlgFolder ref="dlgfolder" />
     <DlgWait ref="dlgwait" />
     <DlgUrl ref="dlgurl" />
@@ -2920,18 +2830,6 @@ class App extends React.Component {
     <table>
     <tbody>
     <tr>
-       <td>
-       {
-         // <DropdownButton title={this.state.user} id="id_dropdown1">
-         //    <li hidden={this.state.user!=="AnonymousUser"}>
-         //      <ExampleModal onLoginSubmit={this.onLoginSubmit} title="登录" />
-         //    </li>
-         //    <li  hidden={this.state.user==="AnonymousUser"} >
-         //      <a onClick={this.handleLogout}>注销</a>
-         //    </li>
-         // </DropdownButton>
-       }
-      </td>
     <td>
           <input type="text" value={this.state.search}  placeholder="合同 or 仪器编号" onChange={this.handleSearchChange} />
           <button id="id_bt_search" className="btm btn-info" onClick={this.search}>搜索
@@ -2955,12 +2853,13 @@ class App extends React.Component {
   </tr>
   </tbody>
   </table>
-  <table className="table-bordered"><thead><tr><th>ID</th><th>用户单位</th><th>客户地址</th><th>通道配置</th><th>仪器型号</th><th>仪器编号</th><th>包箱</th><th>审核</th>
-  <th>入库时间</th><th>调试时间</th><th>合同编号</th><th>方法</th></tr></thead><tbody id="contact-list">{contactRows}</tbody>
+  <table className="table-bordered"><thead><tr><th>ID</th><th>合同编号</th><th>用户单位</th><th>客户地址</th><th>通道配置</th><th>仪器型号</th><th>仪器编号</th><th>包箱</th>
+  <th>入库时间</th><th>方法</th></tr></thead><tbody id="contact-list">{contactRows}</tbody>
   </table>{prev}
   <label id="page">{this.state.start+1}../{this.state.total}</label>{next}
       <input maxLength="6" size="6" onChange={this.handlePageChange} value={this.state.start_input} />
       <button id="page_go"  className="btn btn-info" onClick={this.jump}>跳转</button>
+   <div style={{"minHeight":"200px"}}></div>
   </div>
     );
   }

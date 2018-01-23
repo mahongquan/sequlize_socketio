@@ -134,12 +134,28 @@ models.sequelize.sync().then(
 			}); //delete
 			//route.post('/rest/Contact', async function(ctx,next) {
 			socket.on('/post/Contact', async function( data, callback ) {		
-				var contact =await models.Contact.create(data)
-				callback({
-					success:true,
-					data: contact,
-					message: "create Contact ok"
-				});
+				let  contact;
+				try{
+					contact=await models.Contact.create(data);
+					callback({
+						success:true,
+						data: contact,
+						message: "create Contact ok"
+					});
+				}
+				catch(e){
+					console.log(e);
+					for(var i in e){
+						console.log(i)
+					}
+					callback({
+						success:false,
+						message: e.message,
+						error:e
+					});
+
+				}
+			
 			});
 			//route.put('/rest/Contact', async function(ctx,next) {
 			socket.on('/put/Contact', async function( data, callback ) {			
@@ -147,6 +163,7 @@ models.sequelize.sync().then(
 				contact.update(data);
 				contact.save();
 				callback({
+					success:true,
 					data: contact,
 					message: "update  Contact ok"
 				});
