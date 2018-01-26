@@ -126,20 +126,20 @@ class  Browser extends React.Component {
 
     loadFilesFromServer=(path)=>{
         var self=this;
-            socket.emit("/fs/children",{path:path},
-              (data)=>{
-                    var files = data.children.sort(self.state.sort);
-                    var paths = self.state.paths;
-                    if (paths[paths.length-1] !== path)
-                    paths = paths.concat([path])
-                    self.setState(
-                            {files: files,
-                                    paths: paths,
-                            sort: self.state.sort,
-                            gridView: self.state.gridView});
-                    self.updateNavbarPath(self.currentPath());
-              }
-            );
+        socket.emit("/fs/children",{path:path},
+          (data)=>{
+                var files = data.children.sort(self.state.sort);
+                var paths = self.state.paths;
+                if (paths[paths.length-1] !== path)
+                paths = paths.concat([path])
+                self.setState(
+                        {files: files,
+                                paths: paths,
+                        sort: self.state.sort,
+                        gridView: self.state.gridView});
+                self.updateNavbarPath(self.currentPath());
+          }
+        );
     }
     updateNavbarPath=(path)=>{
          // var elem  = document.getElementById("pathSpan");
@@ -188,11 +188,11 @@ class  Browser extends React.Component {
 
 
     uploadFile=()=>{
-        var path = this.currentPath();
-        var readFile = evt.target.files[0];
-        var name = readFile.name;
-        //console.log(readFile);
-        socket.emit("/fs/upload",{},()=>{});
+        // var path = this.currentPath();
+        // var readFile = evt.target.files[0];
+        // var name = readFile.name;
+        // //console.log(readFile);
+        // socket.emit("/fs/upload",{},()=>{});
         // var formData = new FormData();
         // formData.append("file", readFile, name);
 
@@ -215,11 +215,12 @@ class  Browser extends React.Component {
 
 
     componentDidMount=()=>{
-        //console.log("mount======");
+        console.log("browser mount======");
         //console.log(this.props.initpath);
         if (this.props.initpath)
             this.state.paths.push(this.props.initpath);
         var path = this.currentPath();
+        console.log(path);
         this.loadFilesFromServer(path);
     }
 
@@ -371,12 +372,13 @@ class  Browser extends React.Component {
 /////////////
 class DlgFolder2 extends React.Component{
   state={ 
+      initpath:".",
       showModal: false,
       hiddenPacks:true,
       error:"",
     }
   close=()=>{
-    this.setState({ showModal: false });
+    this.setState({ showModal: false ,initpath:"."});
   }
 
   open=()=>{
@@ -389,7 +391,7 @@ class DlgFolder2 extends React.Component{
             <Modal.Title>文件浏览</Modal.Title>
           </Modal.Header>
           <Modal.Body>
-          <Browser initpath={this.props.initpath}/> 
+          <Browser initpath={this.state.initpath}/> 
           </Modal.Body>
         </Modal>
     );
@@ -2549,7 +2551,8 @@ class ContactEdit2New  extends React.Component{
     );
   }
 };
-//App//////////////////////
+///////////////////////////////////App/////////////////////////////////////////////////////////////
+////////////////////////////////////////////////////////////////////////////////////////
 class App extends React.Component {
   mystate = {
     start:0,
@@ -2560,6 +2563,12 @@ class App extends React.Component {
     search:""
   }
    state = {
+    displayFilterYiqibh:"none",
+    filter_yiqibh:"",
+    displayFilterDanwei:"none",
+    filter_danwei:"",
+    displayFilterHtbh:"none",
+    filter_htbh:"",
     contacts: [],
     user: "AnonymousUser",
     start:0,
@@ -2580,10 +2589,13 @@ class App extends React.Component {
     this.load_data();
   }
   load_data=()=>{
+    console.log("loaddata");
     socket.emit("/get/Contact",
       { start:this.mystate.start,
         limit:this.mystate.limit,
-        search:this.mystate.search,
+        search:this.state.filter_htbh,
+        yiqibh:this.state.filter_yiqibh,
+        filter_danwei:this.state.filter_danwei,
         baoxiang:this.mystate.baoxiang,
       }, 
       (contacts) => {
@@ -2641,6 +2653,7 @@ class App extends React.Component {
     //   this.handleUserChange(this.state.user);
     // });
   };
+  
   handleSearchChange = (e) => {
     this.mystate.search=e.target.value;
     this.setState({search:this.mystate.search});
@@ -2747,6 +2760,52 @@ class App extends React.Component {
   openDlgImport=()=>{
     this.refs.dlgimport.open();
   }
+  show_displayFilterHtbh=()=>{
+    this.setState({displayFilterHtbh:"inline"});
+  }
+  handle_filterhtbh_Change= (e) => {
+    console.log(e.target.value);
+    this.setState({filter_htbh:e.target.value});
+  };
+  handle_filterhtbh_input=()=>{
+    console.log(this.state.filter_htbh);
+    if(this.state.filter_htbh===""){
+      this.setState({displayFilterHtbh:"none"});
+    }
+    this.mystate.start=0;
+    this.load_data();
+  }
+  show_displayFilterDanwei=()=>{
+    this.setState({displayFilterDanwei:"inline"});
+  }
+  handle_filterdanwei_Change= (e) => {
+    console.log(e.target.value);
+    this.setState({filter_danwei:e.target.value});
+  };
+  handle_filterdanwei_input=()=>{
+    console.log(this.state.filter_danwei);
+    if(this.state.filter_danwei===""){
+      this.setState({displayFilterDanwei:"none"});
+    }
+    this.mystate.start=0;
+    this.load_data();
+  }
+  /////
+  show_displayFilterYiqibh=()=>{
+    this.setState({displayFilterYiqibh:"inline"});
+  }
+  handle_filteryiqibh_Change= (e) => {
+    console.log(e.target.value);
+    this.setState({filter_yiqibh:e.target.value});
+  };
+  handle_filteryiqibh_input=()=>{
+    console.log(this.state.filter_yiqibh);
+    if(this.state.filter_yiqibh===""){
+      this.setState({displayFilterYiqibh:"none"});
+    }
+    this.mystate.start=0;
+    this.load_data();
+  }
   render() {
     //console.log("render=========================");
     const contactRows = this.state.contacts.map((contact, idx) => (
@@ -2830,30 +2889,47 @@ class App extends React.Component {
     <table>
     <tbody>
     <tr>
-    <td>
-          <input type="text" value={this.state.search}  placeholder="合同 or 仪器编号" onChange={this.handleSearchChange} />
-          <button id="id_bt_search" className="btm btn-info" onClick={this.search}>搜索
-          <span className="glyphicon glyphicon-search" aria-hidden="true"></span>
-          </button>
-    </td>
+    
     <td>
          <button className="btn btn-primary" onClick={()=>this.handleEdit(null)}>新仪器</button>
     </td>
      <td>
           <DlgImport/>
     </td>
-    <td>过滤:
-    <DropdownButton title={this.state.baoxiang} id="id_dropdown2">
+  </tr>
+  </tbody>
+  </table>
+  <table className="table-bordered">
+  <thead>
+  <tr><th>ID</th>
+  <th><div>合同编号<span onClick={this.show_displayFilterHtbh} className="caret"  aria-hidden="true"></span></div>
+    <div style={{display:this.state.displayFilterHtbh}}>
+      <input  value={this.state.filter_htbh} onChange={this.handle_filterhtbh_Change}  />
+      <button onClick={this.handle_filterhtbh_input}>filter</button>
+    </div>
+    </th>
+  <th>
+    <div>用户单位<span onClick={this.show_displayFilterDanwei} className="caret"  aria-hidden="true"></span></div>
+    <div style={{display:this.state.displayFilterDanwei}}>
+      <input  value={this.state.filter_danwei} onChange={this.handle_filterdanwei_Change}  />
+      <button onClick={this.handle_filterdanwei_input}>filter</button>
+    </div>
+  </th>
+  <th>客户地址</th><th>通道配置</th><th>仪器型号</th>
+  <th>
+    <div>仪器编号<span onClick={this.show_displayFilterYiqibh} className="caret"  aria-hidden="true"></span></div>
+    <div style={{display:this.state.displayFilterYiqibh}}>
+      <input  value={this.state.filter_yiqibh} onChange={this.handle_filteryiqibh_Change}  />
+      <button onClick={this.handle_filteryiqibh_input}>filter</button>
+    </div>
+  </th>
+  <th>包箱<DropdownButton title={this.state.baoxiang} id="id_dropdown2">
       <MenuItem onSelect={() => this.onSelectBaoxiang("马红权")}>马红权</MenuItem>
       <MenuItem onSelect={() => this.onSelectBaoxiang("陈旺")}>陈旺</MenuItem>
       <MenuItem onSelect={() => this.onSelectBaoxiang("吴振宁")}>吴振宁</MenuItem>
       <MenuItem onSelect={() => this.onSelectBaoxiang("")}>*</MenuItem>
     </DropdownButton>
-  </td>
-  </tr>
-  </tbody>
-  </table>
-  <table className="table-bordered"><thead><tr><th>ID</th><th>合同编号</th><th>用户单位</th><th>客户地址</th><th>通道配置</th><th>仪器型号</th><th>仪器编号</th><th>包箱</th>
+  </th>
   <th>入库时间</th><th>方法</th></tr></thead><tbody id="contact-list">{contactRows}</tbody>
   </table>{prev}
   <label id="page">{this.state.start+1}../{this.state.total}</label>{next}
