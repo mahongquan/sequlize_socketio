@@ -1,55 +1,43 @@
-<<<<<<< HEAD
-{
-  "name": "sequlize_socketio",
-  "version": "0.1.0",
-  "main":"main.js",
-  "homepage":".",
-  "private": true,
-  "scripts": {
-    "dev": "next",
-    "build": "next build",
-    "start": "node app2",
-    "starts": "node ./bin/www",
-    "test": "npm run test-unit && npm run test-integration",
-    "test-unit": "mocha test/unit/*.test.js",
-    "test-integration": "mocha test/integration/*.test.js"
-  },
-  "dependencies": {
-    "mime":"^2.2.0",
-    "react": "^15.6.1",
-    "react-dom": "^15.6.1",
-    "socket.io": "^2.0.3",
-    "socket.io-client": "^2.0.3",
-    "socket.io-stream":"^0.9.1",
-    "sequelize": "^3.3.2",
-    "sqlite3": "^3.1.9"
-  },
-  "devDependencies": {}
-}
-=======
 {
   "name": "sequlize_socketio",
   "version": "0.1.0",
   "private": true,
+  "main": "main.js",
   "scripts": {
-    "dev": "next",
-    "build": "next build",
-    "start": "node app2",
-    "starts": "node ./bin/www",
-    "test": "npm run test-unit && npm run test-integration",
-    "test-unit": "mocha test/unit/*.test.js",
-    "test-integration": "mocha test/integration/*.test.js"
+    "dev": "react-scripts start",
+    "build": "react-scripts build",
+    "start": "node app2"
   },
   "dependencies": {
-    "mime":"^2.3.1",
-    "react": "^16.6.0",
-    "react-dom": "^16.6.0",
+    "babel-eslint": "^9.0.0",
+    "bootstrap": "3.3.7",
+    "chart.js": "2.3",
+    "chartjs": "^0.3.24",
+    "immutability-helper": "^2.8.1",
+    "lodash.find": "^4.6.0",
+    "lodash.isequal": "^4.5.0",
+    "mime": "^2.3.1",
+    "moment": "^2.22.2",
+    "prop-types": "^15.6.2",
+    "react": "^16.6.3",
+    "react-autosuggest": "^9.4.2",
+    "react-bootstrap": "^0.32.4",
+    "react-chartjs-2": "^2.7.4",
+    "react-contextmenu": "^2.10.0",
+    "react-datetime": "^2.16.2",
+    "react-dom": "^16.6.3",
+    "react-scripts": "^2.1.1",
+    "sequelize": "^4.41.0",
     "socket.io": "^2.1.1",
     "socket.io-client": "^2.1.1",
-    "socket.io-stream":"^0.9.1",
-    "sequelize": "^4.41.0",
+    "socket.io-stream": "^0.9.1",
     "sqlite3": "^4.0.3"
   },
-  "devDependencies": {}
+  "devDependencies": {},
+  "browserslist": [
+    ">0.2%",
+    "not dead",
+    "not ie <= 11",
+    "not op_mini all"
+  ]
 }
->>>>>>> b233e9533330968e6407dbb75acafca931c30d18

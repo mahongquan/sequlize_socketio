@@ -2,7 +2,7 @@
 var exec = require('child_process').exec;
 //var readStandardFile=require('./readstandard')
 var static = require('./node-static');
-var file = new static.Server('./public');
+var file = new static.Server('./build');
 var debug = require('debug')('express-example');
 var models = require("./models");
 var ss = require('socket.io-stream');

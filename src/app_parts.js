@@ -1,10 +1,12 @@
 import React from 'react';
 import Autosuggest from 'react-autosuggest';
 import io from 'socket.io-client';
-import isEqual  from 'lodash/isEqual';
-import find from 'lodash/find';
-import PropTypes from 'prop-types'
+// import isEqual  from 'lodash.isequal';
+// import find from 'lodash.find';
+// import PropTypes from 'prop-types'
 import update from 'immutability-helper';
+import {Bar} from "react-chartjs-2";
+import { ContextMenu, ContextMenuTrigger } from "react-contextmenu";
 import {
   Button,
   Table,
@@ -17,14 +19,15 @@ import {
 } from "react-bootstrap";
 const HOST = 'http://localhost:8000';
 var socket = io.connect(HOST);
+var ss = require('socket.io-stream');
 var moment = require('moment');
-var locale=require('moment/locale/zh-cn');
+require('moment/locale/zh-cn');
 var DateTime=require('react-datetime');
-var host = '';
+// var host = '';
 //Browser///////////////////////////////////////////////////////
-function buildUploadUrl(path, name) {
-  return '/fs/upload?path=' + path + '&name=' + name;
-}
+// function buildUploadUrl(path, name) {
+//   return '/fs/upload?path=' + path + '&name=' + name;
+// }
 function buildMkdirUrl(path, name) {
   return '/fs/mkdir?path=' + path + '&name=' + name;
 }
@@ -38,7 +41,7 @@ class File extends React.Component {
     return className;
   };
 
-  remove = () => {
+  remove = (path) => {
     socket.emit('/fs/remove', { path: path }, () => {
       this.props.browser.reloadFilesFromServer();
     });
@@ -79,13 +82,13 @@ class File extends React.Component {
       <tr id={this.props.id} ref={this.props.path}>
         <td>
           <ContextMenuTrigger id={'' + this.props.id}>
-            <a onClick={this.props.onClick}>
+            <Button onClick={this.props.onClick}>
               <span
                 style={{ fontSize: '1.5em', paddingRight: '10px' }}
                 className={glyphClass}
               />
               {this.props.name}
-            </a>
+            </Button>
           </ContextMenuTrigger>
           <ContextMenu id={'' + this.props.id}>
             <MenuItem data={{ a: 1 }} onClick={this.onRemove}>
@@ -106,9 +109,9 @@ class File extends React.Component {
     return (
       <div ref={this.props.path}>
         <ContextMenuTrigger id={'' + this.props.id}>
-          <a id={this.props.id} onClick={this.props.onClick}>
+          <Button id={this.props.id} onClick={this.props.onClick}>
             <span style={{ fontSize: '3.5em' }} className={glyphClass} />
-          </a>
+          </Button>
         </ContextMenuTrigger>
         <ContextMenu id={'' + this.props.id}>
           <MenuItem data={{ a: 1 }} onClick={this.onRemove}>
@@ -356,35 +359,35 @@ class Browser extends React.Component {
           >
             <ul className="nav navbar-nav">
               <li id="backButton">
-                <a onClick={this.onBack}>
+                <Button onClick={this.onBack}>
                   <span className="glyphicon glyphicon-arrow-left" />
-                </a>
+                </Button>
               </li>
               <li id="parentButton">
-                <a onClick={this.onParent}>
+                <Button onClick={this.onParent}>
                   <span className="glyphicon glyphicon-arrow-up" />
-                </a>
+                </Button>
               </li>
               <li id="uploadButton">
-                <a onClick={this.onUpload}>
+                <Button onClick={this.onUpload}>
                   <span className="glyphicon glyphicon-upload" />
-                </a>
+                </Button>
               </li>
               <li id="mkdirButton">
-                <a onClick={this.mkdir}>
+                <Button onClick={this.mkdir}>
                   <span className="glyphicon glyphicon-folder-open" />
-                </a>
+                </Button>
               </li>
               <li id="alternateViewButton">
-                <a onClick={this.alternateView}>
+                <Button onClick={this.alternateView}>
                   <span ref="altViewSpan" className={className} />
-                </a>
+                </Button>
               </li>
               <li>
-                <a id="pathSpan">
+                <Button id="pathSpan">
                   <span className="glyphicon glyphicon-chevron-right" />
                   {this.state.current_path}
-                </a>
+                </Button>
               </li>
             </ul>
           </div>
@@ -500,382 +503,6 @@ class DlgFolder2 extends React.Component {
       </Modal>
     );
   };
-}
-//////////////react-Chart////////////////////////////
-class ChartComponent extends React.Component {
-  static getLabelAsKey = d => d.label;
-  static propTypes = {
-    data: PropTypes.oneOfType([PropTypes.object, PropTypes.func]).isRequired,
-    getDatasetAtEvent: PropTypes.func,
-    getElementAtEvent: PropTypes.func,
-    getElementsAtEvent: PropTypes.func,
-    height: PropTypes.number,
-    legend: PropTypes.object,
-    onElementsClick: PropTypes.func,
-    options: PropTypes.object,
-    plugins: PropTypes.arrayOf(PropTypes.object),
-    redraw: PropTypes.bool,
-    type: function(props, propName, componentName) {
-      if (!Chart.controllers[props[propName]]) {
-        return new Error(
-          'Invalid chart type `' +
-            props[propName] +
-            '` supplied to' +
-            ' `' +
-            componentName +
-            '`.'
-        );
-      }
-    },
-    width: PropTypes.number,
-    datasetKeyProvider: PropTypes.func,
-  };
-
-  static defaultProps = {
-    legend: {
-      display: true,
-      position: 'bottom',
-    },
-    type: 'doughnut',
-    height: 150,
-    width: 300,
-    redraw: false,
-    options: {},
-    datasetKeyProvider: ChartComponent.getLabelAsKey,
-  };
-
-  componentWillMount() {
-    this.chart_instance = undefined;
-  }
-
-  componentDidMount() {
-    this.renderChart();
-  }
-
-  componentDidUpdate() {
-    if (this.props.redraw) {
-      this.chart_instance.destroy();
-      this.renderChart();
-      return;
-    }
-
-    this.updateChart();
-  }
-
-  shouldComponentUpdate(nextProps) {
-    const {
-      redraw,
-      type,
-      options,
-      plugins,
-      legend,
-      height,
-      width,
-    } = this.props;
-
-    if (nextProps.redraw === true) {
-      return true;
-    }
-
-    if (height !== nextProps.height || width !== nextProps.width) {
-      return true;
-    }
-
-    if (type !== nextProps.type) {
-      return true;
-    }
-
-    if (!isEqual(legend, nextProps.legend)) {
-      return true;
-    }
-
-    if (!isEqual(options, nextProps.options)) {
-      return true;
-    }
-
-    const nextData = this.transformDataProp(nextProps);
-
-    if (!isEqual(this.shadowDataProp, nextData)) {
-      return true;
-    }
-
-    return !isEqual(plugins, nextProps.plugins);
-  }
-
-  componentWillUnmount() {
-    this.chart_instance.destroy();
-  }
-
-  transformDataProp(props) {
-    const { data } = props;
-    if (typeof data == 'function') {
-      const node = this.element;
-      return data(node);
-    } else {
-      return data;
-    }
-  }
-
-  // Chart.js directly mutates the data.dataset objects by adding _meta proprerty
-  // this makes impossible to compare the current and next data changes
-  // therefore we memoize the data prop while sending a fake to Chart.js for mutation.
-  // see https://github.com/chartjs/Chart.js/blob/master/src/core/core.controller.js#L615-L617
-  memoizeDataProps() {
-    if (!this.props.data) {
-      return;
-    }
-
-    const data = this.transformDataProp(this.props);
-
-    this.shadowDataProp = {
-      ...data,
-      datasets:
-        data.datasets &&
-        data.datasets.map(set => {
-          return {
-            ...set,
-          };
-        }),
-    };
-
-    return data;
-  }
-
-  updateChart() {
-    const { options } = this.props;
-
-    const data = this.memoizeDataProps(this.props);
-
-    if (!this.chart_instance) return;
-
-    if (options) {
-      this.chart_instance.options = Chart.helpers.configMerge(
-        this.chart_instance.options,
-        options
-      );
-    }
-
-    // Pipe datasets to chart instance datasets enabling
-    // seamless transitions
-    let currentDatasets =
-      (this.chart_instance.config.data &&
-        this.chart_instance.config.data.datasets) ||
-      [];
-    const nextDatasets = data.datasets || [];
-
-    // use the key provider to work out which series have been added/removed/changed
-    const currentDatasetKeys = currentDatasets.map(
-      this.props.datasetKeyProvider
-    );
-    const nextDatasetKeys = nextDatasets.map(this.props.datasetKeyProvider);
-    const newDatasets = nextDatasets.filter(
-      d => currentDatasetKeys.indexOf(this.props.datasetKeyProvider(d)) === -1
-    );
-
-    // process the updates (via a reverse for loop so we can safely splice deleted datasets out of the array
-    for (let idx = currentDatasets.length - 1; idx >= 0; idx -= 1) {
-      const currentDatasetKey = this.props.datasetKeyProvider(
-        currentDatasets[idx]
-      );
-      if (nextDatasetKeys.indexOf(currentDatasetKey) === -1) {
-        // deleted series
-        currentDatasets.splice(idx, 1);
-      } else {
-        const retainedDataset = find(
-          nextDatasets,
-          d => this.props.datasetKeyProvider(d) === currentDatasetKey
-        );
-        if (retainedDataset) {
-          // update it in place if it is a retained dataset
-          currentDatasets[idx].data.splice(retainedDataset.data.length);
-          retainedDataset.data.forEach((point, pid) => {
-            currentDatasets[idx].data[pid] = retainedDataset.data[pid];
-          });
-          const { data, ...otherProps } = retainedDataset;
-          currentDatasets[idx] = {
-            data: currentDatasets[idx].data,
-            ...currentDatasets[idx],
-            ...otherProps,
-          };
-        }
-      }
-    }
-    // finally add any new series
-    newDatasets.forEach(d => currentDatasets.push(d));
-    const { datasets, ...rest } = data;
-
-    this.chart_instance.config.data = {
-      ...this.chart_instance.config.data,
-      ...rest,
-    };
-
-    this.chart_instance.update();
-  }
-
-  renderChart() {
-    const { options, legend, type, redraw, plugins } = this.props;
-    const node = this.element;
-    const data = this.memoizeDataProps();
-
-    if (
-      typeof legend !== 'undefined' &&
-      !isEqual(ChartComponent.defaultProps.legend, legend)
-    ) {
-      options.legend = legend;
-    }
-
-    this.chart_instance = new Chart(node, {
-      type,
-      data,
-      options,
-      plugins,
-    });
-  }
-
-  handleOnClick = event => {
-    const instance = this.chart_instance;
-
-    const {
-      getDatasetAtEvent,
-      getElementAtEvent,
-      getElementsAtEvent,
-      onElementsClick,
-    } = this.props;
-
-    getDatasetAtEvent &&
-      getDatasetAtEvent(instance.getDatasetAtEvent(event), event);
-    getElementAtEvent &&
-      getElementAtEvent(instance.getElementAtEvent(event), event);
-    getElementsAtEvent &&
-      getElementsAtEvent(instance.getElementsAtEvent(event), event);
-    onElementsClick &&
-      onElementsClick(instance.getElementsAtEvent(event), event); // Backward compatibility
-  };
-
-  ref = element => {
-    this.element = element;
-  };
-
-  render() {
-    const { height, width, onElementsClick } = this.props;
-
-    return (
-      <canvas
-        ref={this.ref}
-        height={height}
-        width={width}
-        onClick={this.handleOnClick}
-      />
-    );
-  }
-}
-
-class Doughnut extends React.Component {
-  render() {
-    return (
-      <ChartComponent
-        {...this.props}
-        ref={ref => (this.chart_instance = ref && ref.chart_instance)}
-        type="doughnut"
-      />
-    );
-  }
-}
-
-class Pie extends React.Component {
-  render() {
-    return (
-      <ChartComponent
-        {...this.props}
-        ref={ref => (this.chart_instance = ref && ref.chart_instance)}
-        type="pie"
-      />
-    );
-  }
-}
-
-class Line extends React.Component {
-  render() {
-    return (
-      <ChartComponent
-        {...this.props}
-        ref={ref => (this.chart_instance = ref && ref.chart_instance)}
-        type="line"
-      />
-    );
-  }
-}
-
-class Bar extends React.Component {
-  render() {
-    return (
-      <ChartComponent
-        {...this.props}
-        ref={ref => (this.chart_instance = ref && ref.chart_instance)}
-        type="bar"
-      />
-    );
-  }
-}
-
-class HorizontalBar extends React.Component {
-  render() {
-    return (
-      <ChartComponent
-        {...this.props}
-        ref={ref => (this.chart_instance = ref && ref.chart_instance)}
-        type="horizontalBar"
-      />
-    );
-  }
-}
-
-class Radar extends React.Component {
-  render() {
-    return (
-      <ChartComponent
-        {...this.props}
-        ref={ref => (this.chart_instance = ref && ref.chart_instance)}
-        type="radar"
-      />
-    );
-  }
-}
-
-class Polar extends React.Component {
-  render() {
-    return (
-      <ChartComponent
-        {...this.props}
-        ref={ref => (this.chart_instance = ref && ref.chart_instance)}
-        type="polarArea"
-      />
-    );
-  }
-}
-
-class Bubble extends React.Component {
-  render() {
-    return (
-      <ChartComponent
-        {...this.props}
-        ref={ref => (this.chart_instance = ref && ref.chart_instance)}
-        type="bubble"
-      />
-    );
-  }
-}
-
-class Scatter extends React.Component {
-  render() {
-    return (
-      <ChartComponent
-        {...this.props}
-        ref={ref => (this.chart_instance = ref && ref.chart_instance)}
-        type="scatter"
-      />
-    );
-  }
 }
 ///////////////////////////////////////////////////////////////////////////////////////////////
 ///////
@@ -1213,7 +840,7 @@ class PackItems extends React.Component {
     this.setState({ items: contacts2 });
   };
   addrow = item_id => {
-    var url = '/PackItem';
+    // var url = '/PackItem';
     var data = {
       pack_id: this.props.pack_id,
       item_id: item_id,
@@ -1231,7 +858,7 @@ class PackItems extends React.Component {
   };
   onEditClick = id => {};
   onDeleteClick = itemIndex => {
-    var url = '/PackItem';
+    // var url = '/PackItem';
     socket.emit(
       '/delete/PackItem',
       { id: this.state.items[itemIndex].id },
@@ -1271,13 +898,13 @@ class PackItems extends React.Component {
           />
         </td>
         <td>
-          <a onClick={() => this.handleEdit(idx)}>编辑</a>
-          <a
+          <Button onClick={() => this.handleEdit(idx)}>编辑</Button>
+          <Button
             style={{ marginLeft: '10px' }}
             onClick={() => this.onDeleteClick(idx)}
           >
             删除
-          </a>
+          </Button>
         </td>
       </tr>
     ));
@@ -1751,7 +1378,7 @@ class UsePacks2 extends React.Component {
     //console.log(this.refs.autocomplete);
   };
   new_pack = id => {
-    var url = '/UsePackEx';
+    // var url = '/UsePackEx';
     var data = {
       name: this.state.auto_value,
       contact_id: this.props.contact_id,
@@ -1763,7 +1390,7 @@ class UsePacks2 extends React.Component {
     });
   };
   addrow = pack_id => {
-    var url = '/UsePack';
+    // var url = '/UsePack';
     var data = { contact_id: this.props.contact_id, pack_id: pack_id };
     socket.emit('/post/UsePack', data, res => {
       var p = res.data;
@@ -1776,7 +1403,7 @@ class UsePacks2 extends React.Component {
   };
   onEditClick = id => {};
   onDeleteClick = itemIndex => {
-    var url = '/UsePack';
+    // var url = '/UsePack';
     socket.emit(
       '/delete/UsePack',
       { id: this.state.usepacks[itemIndex].id },
@@ -1827,13 +1454,13 @@ class UsePacks2 extends React.Component {
         <td hidden={this.state.release}>{usepack.pack}</td>
         <td hidden={this.state.release}>{usepack.hetongbh}</td>
         <td>
-          <a onClick={() => this.handleEdit(idx)}>编辑</a>
-          <a
+          <Button onClick={() => this.handleEdit(idx)}>编辑</Button>
+          <Button
             onClick={() => this.onDeleteClick(idx)}
             style={{ marginLeft: '10px' }}
           >
             删除
-          </a>
+          </Button>
         </td>
       </tr>
     ));
@@ -2194,9 +1821,6 @@ class DlgCopyPack extends React.Component {
                     suggestions={this.state.auto_items}
                     renderSuggestion={(item, isHighlighted) => (
                       <div
-                        style={
-                          isHighlighted ? styles.highlightedItem : styles.item
-                        }
                         key={item.id}
                         id={item.id}
                       >
@@ -2350,11 +1974,11 @@ class DlgPacks extends React.Component {
             </thead>
             <tbody id="contact-list">{contactRows}</tbody>
           </Table>
-          <a onClick={this.handlePrev}>前一页</a>
+          <Button onClick={this.handlePrev}>前一页</Button>
           <label id="page">
             {this.state.start + 1}../{this.state.total}
           </label>
-          <a onClick={this.handleNext}>后一页</a>
+          <Button onClick={this.handleNext}>后一页</Button>
           <input
             maxLength="6"
             size="6"
@@ -2513,11 +2137,11 @@ class DlgItems extends React.Component {
             </thead>
             <tbody id="contact-list">{contactRows}</tbody>
           </Table>
-          <a onClick={this.handlePrev}>前一页</a>
+          <Button onClick={this.handlePrev}>前一页</Button>
           <label id="page">
             {this.state.start + 1}../{this.state.total}
           </label>
-          <a onClick={this.handleNext}>后一页</a>
+          <Button onClick={this.handleNext}>后一页</Button>
           <input
             maxLength="6"
             size="6"
@@ -2598,10 +2222,10 @@ class ContactEdit extends React.Component {
       this.setState({ hiddenPacks: true });
     } else {
       this.old = this.parent.state.contacts[this.index];
-      if (this.old.channels == undefined) {
+      if (this.old.channels === undefined) {
         this.old.channels = '';
       }
-      if (this.old.yiqixinghao == undefined) {
+      if (this.old.yiqixinghao === undefined) {
         this.old.yiqixinghao = '';
       }
       this.setState({ hiddenPacks: false });
@@ -3171,6 +2795,7 @@ export default class App extends React.Component {
   };
   onSelectBaoxiang = e => {
     this.mystate.baoxiang = e;
+    this.mystate.start=0;
     this.setState({ baoxiang: e });
     this.load_data();
   };
@@ -3273,7 +2898,7 @@ export default class App extends React.Component {
         <td>{contact.channels}</td>
         <td>{contact.yiqixinghao}</td>
         <td>
-          <a onClick={() => this.handleEdit(idx)}>{contact.yiqibh}</a>
+          <Button onClick={() => this.handleEdit(idx)}>{contact.yiqibh}</Button>
           <DropdownButton title="" id="id_dropdown3">
             <MenuItem onSelect={() => this.onDetailClick(contact.id)}>
               详细
@@ -3322,12 +2947,12 @@ export default class App extends React.Component {
       hasnext = false;
     }
     if (hasprev) {
-      prev = <a onClick={this.handlePrev}>前一页</a>;
+      prev = <Button onClick={this.handlePrev}>前一页</Button>;
     } else {
       prev = null;
     }
     if (hasnext) {
-      next = <a onClick={this.handleNext}>后一页</a>;
+      next = <Button onClick={this.handleNext}>后一页</Button>;
     } else {
       next = null;
     }
@@ -3361,7 +2986,7 @@ export default class App extends React.Component {
         <Navbar className="navbar-inverse">
           <Navbar.Header>
             <Navbar.Brand>
-              <a>装箱单</a>
+              <span>装箱单</span>
             </Navbar.Brand>
           </Navbar.Header>
           <Nav>
