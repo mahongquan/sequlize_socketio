@@ -1,6 +1,8 @@
 {
   "name": "sequlize_socketio",
   "version": "0.1.0",
+  "main":"main.js",
+  "homepage":".",
   "private": true,
   "scripts": {
     "dev": "next",
