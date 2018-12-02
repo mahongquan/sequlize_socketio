@@ -1,0 +1,50 @@
+Arguments: 
+  /usr/local/n/versions/node/8.12.0/bin/node /usr/share/yarn/bin/yarn.js
+
+PATH: 
+  /home/mhq/.yarn/bin:/usr/local/n/versions/node/8.12.0/bin:/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin:/usr/games:/usr/local/games:/snap/bin:/home/mhq/下载/node-v6.11.1-linux-x64/bin
+
+Yarn version: 
+  1.10.1
+
+Node version: 
+  8.12.0
+
+Platform: 
+  linux x64
+
+Trace: 
+  Error: ENOENT: no such file or directory, copyfile '/home/mhq/.cache/yarn/v2/npm-ms-0.7.1-9cd13c03adbff25b65effde7ce864ee952017098/.npmignore' -> '/home/mhq/web/sequlize_socketio/node_modules/socket.io-stream/node_modules/ms/.npmignore'
+
+npm manifest: 
+  {
+    "name": "sequlize_socketio",
+    "version": "0.1.0",
+    "private": true,
+    "scripts": {
+      "dev": "next",
+      "build": "next build",
+      "start": "node app2",
+      "starts": "node ./bin/www",
+      "test": "npm run test-unit && npm run test-integration",
+      "test-unit": "mocha test/unit/*.test.js",
+      "test-integration": "mocha test/integration/*.test.js"
+    },
+    "dependencies": {
+      "mime":"^2.2.0",
+      "react": "^15.6.1",
+      "react-dom": "^15.6.1",
+      "socket.io": "^2.0.3",
+      "socket.io-client": "^2.0.3",
+      "socket.io-stream":"^0.9.1",
+      "sequelize": "^3.3.2",
+      "sqlite3": "^3.1.9"
+    },
+    "devDependencies": {}
+  }
+
+yarn manifest: 
+  No manifest
+
+Lockfile: 
+  No lockfile

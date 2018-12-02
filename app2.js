@@ -343,13 +343,18 @@ models.sequelize.sync().then(
 					baoxiang = data.baoxiang;
 				}
 				var w = {};
+				if (data.yiqibh && data.yiqibh!="") {
+					w.yiqibh ={
+							$like: "%" + data.yiqibh + "%"
+						};
+				}
 				if (search!=""){
 					w.hetongbh ={
 							$like: "%" + search + "%"
 						};
 				}
 				if (filter_danwei!=""){
-					w.addr={
+					w.yonghu={
 							$like: "%" + filter_danwei + "%"
 						};
 				}

@@ -1,3 +1,4 @@
+<<<<<<< HEAD
 {
   "name": "sequlize_socketio",
   "version": "0.1.0",
@@ -25,3 +26,30 @@
   },
   "devDependencies": {}
 }
+=======
+{
+  "name": "sequlize_socketio",
+  "version": "0.1.0",
+  "private": true,
+  "scripts": {
+    "dev": "next",
+    "build": "next build",
+    "start": "node app2",
+    "starts": "node ./bin/www",
+    "test": "npm run test-unit && npm run test-integration",
+    "test-unit": "mocha test/unit/*.test.js",
+    "test-integration": "mocha test/integration/*.test.js"
+  },
+  "dependencies": {
+    "mime":"^2.3.1",
+    "react": "^16.6.0",
+    "react-dom": "^16.6.0",
+    "socket.io": "^2.1.1",
+    "socket.io-client": "^2.1.1",
+    "socket.io-stream":"^0.9.1",
+    "sequelize": "^4.41.0",
+    "sqlite3": "^4.0.3"
+  },
+  "devDependencies": {}
+}
+>>>>>>> b233e9533330968e6407dbb75acafca931c30d18

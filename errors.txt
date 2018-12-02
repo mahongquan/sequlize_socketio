@@ -1,0 +1,2 @@
+(node:8396) UnhandledPromiseRejectionWarning: Unhandled promise rejection (rejection id: 1): SequelizeUniqueConstraintError: Validation error
+(node:8396) [DEP0018] DeprecationWarning: Unhandled promise rejections are deprecated. In the future, promise rejections that are not handled will terminate the Node.js process with a non-zero exit code.
