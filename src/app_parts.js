@@ -1,9 +1,9 @@
 import React from 'react';
 import Autosuggest from 'react-autosuggest';
-import Browser from './Browser';
+//import Browser from './Browser';
 import io from 'socket.io-client';
 import update from 'immutability-helper';
-import {Bar} from "react-chartjs-2";
+import { Bar } from 'react-chartjs-2';
 import {
   Button,
   Table,
@@ -13,13 +13,13 @@ import {
   NavItem,
   DropdownButton,
   MenuItem,
-} from "react-bootstrap";
+} from 'react-bootstrap';
 const HOST = 'http://localhost:8000';
 var socket = io.connect(HOST);
 var ss = require('socket.io-stream');
 var moment = require('moment');
 require('moment/locale/zh-cn');
-var DateTime=require('react-datetime');
+var DateTime = require('react-datetime');
 // var host = '';
 //Browser///////////////////////////////////////////////////////
 // function buildUploadUrl(path, name) {
@@ -51,7 +51,9 @@ class DlgFolder2 extends React.Component {
           <Modal.Title>文件浏览</Modal.Title>
         </Modal.Header>
         <Modal.Body>
-          <Browser socket={socket} initpath={this.state.initpath} />
+          {
+            //<Browser socket={socket} initpath={this.state.initpath} />
+          }
         </Modal.Body>
       </Modal>
     );
@@ -502,7 +504,7 @@ class PackItems extends React.Component {
                   }}
                   onSuggestionSelected={this.auto_select}
                   onSuggestionsFetchRequested={this.auto_change}
-                  onSuggestionsClearRequested={()=>{}}
+                  onSuggestionsClearRequested={() => {}}
                   getSuggestionValue={item => item.name}
                   ref="autocomplete"
                   suggestions={this.state.auto_items}
@@ -1064,7 +1066,7 @@ class UsePacks2 extends React.Component {
                   }}
                   onSuggestionSelected={this.auto_select}
                   onSuggestionsFetchRequested={this.auto_change}
-                  onSuggestionsClearRequested={()=>{}}
+                  onSuggestionsClearRequested={() => {}}
                   getSuggestionValue={item => item.name}
                   ref="autocomplete"
                   suggestions={this.state.auto_items}
@@ -1366,17 +1368,12 @@ class DlgCopyPack extends React.Component {
                     }}
                     onSuggestionSelected={this.auto_select}
                     onSuggestionsFetchRequested={this.auto_change}
-                    onSuggestionsClearRequested={
-                      ()=>{}
-                    }
+                    onSuggestionsClearRequested={() => {}}
                     getSuggestionValue={item => item.name}
                     ref="autocomplete"
                     suggestions={this.state.auto_items}
                     renderSuggestion={(item, isHighlighted) => (
-                      <div
-                        key={item.id}
-                        id={item.id}
-                      >
+                      <div key={item.id} id={item.id}>
                         {item.name}
                       </div>
                     )}
@@ -1714,7 +1711,6 @@ class ContactEdit extends React.Component {
   constructor(props) {
     super(props);
     console.log(React);
-    
   }
   state = {
     showModal: false,
@@ -1730,30 +1726,6 @@ class ContactEdit extends React.Component {
   close = () => {
     this.setState({ showModal: false });
   };
-  // componentWillReceiveProps(nextProps) {
-  //    this.setState({ showModal: nextProps.showModal });
-  //    this.setState({bg:{}});
-  //    this.parent=nextProps.parent;
-  //    if (nextProps.index==null){
-  //      this.old={
-  //        yujifahuo_date:moment().format("YYYY-MM-DD"),
-  //        tiaoshi_date:moment().format("YYYY-MM-DD"),
-  //        addr:"",
-  //        channels:"",
-  //        baoxiang:"",
-  //        hetongbh:"",
-  //        shenhe:"",
-  //        yonghu:"",
-  //        yiqibh:"",
-  //        yiqixinghao:""
-  //      };
-  //    }
-  //    else{
-  //      this.old=this.parent.state.contacts[nextProps.index];
-  //      this.setState({hiddenPacks:false});
-  //    }
-  //    this.setState({contact:this.old});
-  //  }
   open2 = idx => {
     this.setState({ showModal: true });
     this.setState({ bg: {} });
@@ -2029,7 +2001,7 @@ class ContactEdit extends React.Component {
                     getSuggestionValue={item => item}
                     onSuggestionSelected={this.channels_select}
                     onSuggestionsFetchRequested={() => {}}
-                    onSuggestionsClearRequested={()=>{}}
+                    onSuggestionsClearRequested={() => {}}
                     renderSuggestion={item => <span>{item}</span>}
                   />
                 </td>
@@ -2062,7 +2034,7 @@ class ContactEdit extends React.Component {
                       ]}
                       getSuggestionValue={item => item}
                       onSuggestionsFetchRequested={() => {}}
-                      onSuggestionsClearRequested={()=>{}}
+                      onSuggestionsClearRequested={() => {}}
                       onSuggestionSelected={this.yiqixinghao_select}
                       renderSuggestion={item => <span>{item}</span>}
                     />
@@ -2200,7 +2172,7 @@ class ContactEdit extends React.Component {
 ///////////////////////////////////App/////////////////////////////////////////////////////////////
 ////////////////////////////////////////////////////////////////////////////////////////
 export default class App extends React.Component {
-  constructor(){
+  constructor() {
     super();
     this.contactedit = React.createRef();
   }
@@ -2348,7 +2320,7 @@ export default class App extends React.Component {
   };
   onSelectBaoxiang = e => {
     this.mystate.baoxiang = e;
-    this.mystate.start=0;
+    this.mystate.start = 0;
     this.setState({ baoxiang: e });
     this.load_data();
   };
