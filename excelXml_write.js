@@ -1,43 +1,58 @@
-var genData=require("./genData.js");
-var genTest=genData.genTest;
-var genjmd=genData.genjmd;
-var genTestR=genData.genTestR;
+var genData = require('./genData.js');
+var genTest = genData.genTest;
+var genjmd = genData.genjmd;
+var genTestR = genData.genTestR;
 var path = require('path');
 var XLSX = require('xlsx');
-var fs=require("fs");
-var libxmljs = require("libxmljs");
+var fs = require('fs');
+var libxmljs = require('libxmljs');
 console.dir(libxmljs);
-function setCell(table,row,col,value){
-    row=row-1
-    col=col-1
-    rows=table.findall("{urn:schemas-microsoft-com:office:spreadsheet}Row")
-    row1=rows[row]
-    cells=row1.findall("{urn:schemas-microsoft-com:office:spreadsheet}Cell")
-    //{urn:schemas-microsoft-com:office:spreadsheet}Index
-    at=0
-    mycells={}
-    for(var cell in cells){//MergeAcross
-        //print(cell.attrib)
-        if (cell.attrib.get("{urn:schemas-microsoft-com:office:spreadsheet}Index")==None){
-            mycells[at]=cell
-            at+=1
-        }
-        else{
-            at=int(cell.attrib["{urn:schemas-microsoft-com:office:spreadsheet}Index"])
-            mycells[at-1]=cell
-        }
-        if(cell.attrib.get("{urn:schemas-microsoft-com:office:spreadsheet}MergeAcross")!=None)
-            at+=int(cell.attrib["{urn:schemas-microsoft-com:office:spreadsheet}MergeAcross"]);
+function setCell(table, row, col, value) {
+  row = row - 1;
+  col = col - 1;
+  rows = table.findall('{urn:schemas-microsoft-com:office:spreadsheet}Row');
+  row1 = rows[row];
+  cells = row1.findall('{urn:schemas-microsoft-com:office:spreadsheet}Cell');
+  //{urn:schemas-microsoft-com:office:spreadsheet}Index
+  at = 0;
+  mycells = {};
+  for (var cell in cells) {
+    //MergeAcross
+    //print(cell.attrib)
+    if (
+      cell.attrib.get('{urn:schemas-microsoft-com:office:spreadsheet}Index') ==
+      None
+    ) {
+      mycells[at] = cell;
+      at += 1;
+    } else {
+      at = int(
+        cell.attrib['{urn:schemas-microsoft-com:office:spreadsheet}Index']
+      );
+      mycells[at - 1] = cell;
     }
-    // print(mycells)
-    // print(col)
-    // input("here")
-    data=mycells.get(col).find("{urn:schemas-microsoft-com:office:spreadsheet}Data")
-    if(data==None){
-        data=ET.fromstring('<Data xmlns="urn:schemas-microsoft-com:office:spreadsheet" xmlns:ss="urn:schemas-microsoft-com:office:spreadsheet" xmlns:o="urn:schemas-microsoft-com:office:office" xmlns:x="urn:schemas-microsoft-com:office:excel" xmlns:html="http://www.w3.org/TR/REC-html40" ss:Type="String">CS-2800&//9633;</Data>')
-        mycells.get(col).append(data)
-    }
-    data.text=value//"合同号:"+contact.hetongbh
+    if (
+      cell.attrib.get(
+        '{urn:schemas-microsoft-com:office:spreadsheet}MergeAcross'
+      ) != None
+    )
+      at += int(
+        cell.attrib['{urn:schemas-microsoft-com:office:spreadsheet}MergeAcross']
+      );
+  }
+  // print(mycells)
+  // print(col)
+  // input("here")
+  data = mycells
+    .get(col)
+    .find('{urn:schemas-microsoft-com:office:spreadsheet}Data');
+  if (data == None) {
+    data = ET.fromstring(
+      '<Data xmlns="urn:schemas-microsoft-com:office:spreadsheet" xmlns:ss="urn:schemas-microsoft-com:office:spreadsheet" xmlns:o="urn:schemas-microsoft-com:office:office" xmlns:x="urn:schemas-microsoft-com:office:excel" xmlns:html="http://www.w3.org/TR/REC-html40" ss:Type="String">CS-2800&//9633;</Data>'
+    );
+    mycells.get(col).append(data);
+  }
+  data.text = value; //"合同号:"+contact.hetongbh
 }
 // function setCell(table,row,col,value){
 //     var addr={c:col-1, r:row-1} ;
@@ -117,59 +132,61 @@ function setCell(table,row,col,value){
 //         else:
 //             return data.text
 // }
-function genJiaozhunO(c,fn){
-    var data=fs.readFileSync(fn,"utf-8");
-    var tree = libxmljs.parseXmlString(data);
-    console.dir(tree);
-    var root = tree.root()
-    console.dir(root);
-    Worksheets=root.findall("{urn:schemas-microsoft-com:office:spreadsheet}Worksheet")  
-    Worksheet = Worksheets[0]
-    table=Worksheet.find("{urn:schemas-microsoft-com:office:spreadsheet}Table")
+function genJiaozhunO(c, fn) {
+  var data = fs.readFileSync(fn, 'utf-8');
+  var tree = libxmljs.parseXmlString(data);
+  console.dir(tree);
+  var root = tree.root();
+  console.dir(root);
+  Worksheets = root.findall(
+    '{urn:schemas-microsoft-com:office:spreadsheet}Worksheet'
+  );
+  Worksheet = Worksheets[0];
+  table = Worksheet.find('{urn:schemas-microsoft-com:office:spreadsheet}Table');
 
-//     setCell(table,32,16,str(d1.day))//setCell(table,32,16).Value =d1.day//日
-//     d2=d+datetime.timedelta(364)
-//     setCell(table,35,8,str(d2.year))//setCell(table,35,8).Value =d2.year//年
-//     setCell(table,35,12,str(d2.month))//setCell(table,35,12).Value =d2.month//月
-//     setCell(table,35,16,str(d2.day))//setCell(table,35,16).Value =d2.day//日
-//     // //page 2
-//     Worksheet = Worksheets[1]
-//     table=Worksheet.find("{urn:schemas-microsoft-com:office:spreadsheet}Table")
-//     //dd="  地点（LOCATION）： "+c.yonghu
-//     setCellWithFont(table,22,3,["地点","(","LOCATION",")",":","    ",c.yonghu])// setCell(table,22,3).Value=dd
-//     // //page 3
-//     Worksheet = Worksheets[2]// w = a.Worksheets[2]
-//     table=Worksheet.find("{urn:schemas-microsoft-com:office:spreadsheet}Table")
-//     eles=[]
-//     for i in [8,15]:
-//         print("getCell",13,i)
-//         eles.append(getCell(table,13,i))//.Value)
-//     stds=[]
-//     for i in [8,15]:
-//         stds.append(getCell(table,14,i))//setCell(table,14,i).Value)
-//     (tests,errs)=genTestR(eles,stds)
-//     setCell(table,15,8,tests[0]) // setCell(table,15,8).Value=tests[0]
-//     setCell(table,15,15,tests[1]) // setCell(table,15,15).Value=tests[1]
-//     setCell(table,16,8,errs[0]) // setCell(table,16,8).Value=errs[0]
-//     setCell(table,16,15,errs[1]) // setCell(table,16,15).Value=errs[1]
-//     // //jmd
-//     cave=0.0134
-//     crsd=0.74/100
-//     (rs,ave_str,rsd_str)=genjmd(cave,crsd)
-//     cjmd_str=",".join(rs)
-//     setCell(table,20,3,"   测量值(O/%):" +cjmd_str) // setCell(table,20,3).Value="   测量值(O/%):" +cjmd_str
-//     setCell(table,21,3,"   平均值:%s,   相对标准偏差:%s" % (ave_str+"%",rsd_str+"%")) // setCell(table,21,3).Value="   平均值:%s,   相对标准偏差:%s" % (ave_str+"%",rsd_str+"%")
-//     s=BytesIO()
-//     tree.write(s, encoding="utf-8", xml_declaration=True, method="xml")
-//     //s.seek(0)
-//     //data=s.read()
-//     //data=data.decode('utf-8')
-//     return s//data
+  //     setCell(table,32,16,str(d1.day))//setCell(table,32,16).Value =d1.day//日
+  //     d2=d+datetime.timedelta(364)
+  //     setCell(table,35,8,str(d2.year))//setCell(table,35,8).Value =d2.year//年
+  //     setCell(table,35,12,str(d2.month))//setCell(table,35,12).Value =d2.month//月
+  //     setCell(table,35,16,str(d2.day))//setCell(table,35,16).Value =d2.day//日
+  //     // //page 2
+  //     Worksheet = Worksheets[1]
+  //     table=Worksheet.find("{urn:schemas-microsoft-com:office:spreadsheet}Table")
+  //     //dd="  地点（LOCATION）： "+c.yonghu
+  //     setCellWithFont(table,22,3,["地点","(","LOCATION",")",":","    ",c.yonghu])// setCell(table,22,3).Value=dd
+  //     // //page 3
+  //     Worksheet = Worksheets[2]// w = a.Worksheets[2]
+  //     table=Worksheet.find("{urn:schemas-microsoft-com:office:spreadsheet}Table")
+  //     eles=[]
+  //     for i in [8,15]:
+  //         print("getCell",13,i)
+  //         eles.append(getCell(table,13,i))//.Value)
+  //     stds=[]
+  //     for i in [8,15]:
+  //         stds.append(getCell(table,14,i))//setCell(table,14,i).Value)
+  //     (tests,errs)=genTestR(eles,stds)
+  //     setCell(table,15,8,tests[0]) // setCell(table,15,8).Value=tests[0]
+  //     setCell(table,15,15,tests[1]) // setCell(table,15,15).Value=tests[1]
+  //     setCell(table,16,8,errs[0]) // setCell(table,16,8).Value=errs[0]
+  //     setCell(table,16,15,errs[1]) // setCell(table,16,15).Value=errs[1]
+  //     // //jmd
+  //     cave=0.0134
+  //     crsd=0.74/100
+  //     (rs,ave_str,rsd_str)=genjmd(cave,crsd)
+  //     cjmd_str=",".join(rs)
+  //     setCell(table,20,3,"   测量值(O/%):" +cjmd_str) // setCell(table,20,3).Value="   测量值(O/%):" +cjmd_str
+  //     setCell(table,21,3,"   平均值:%s,   相对标准偏差:%s" % (ave_str+"%",rsd_str+"%")) // setCell(table,21,3).Value="   平均值:%s,   相对标准偏差:%s" % (ave_str+"%",rsd_str+"%")
+  //     s=BytesIO()
+  //     tree.write(s, encoding="utf-8", xml_declaration=True, method="xml")
+  //     //s.seek(0)
+  //     //data=s.read()
+  //     //data=data.decode('utf-8')
+  //     return s//data
 }
 // def genJiaozhunOH(c,fn):
 //     tree = ET.parse(fn)
 //     root = tree.getroot()
-//     Worksheets=root.findall("{urn:schemas-microsoft-com:office:spreadsheet}Worksheet")  
+//     Worksheets=root.findall("{urn:schemas-microsoft-com:office:spreadsheet}Worksheet")
 //     Worksheet = Worksheets[0]
 //     table=Worksheet.find("{urn:schemas-microsoft-com:office:spreadsheet}Table")
 //     setCell(table,10,8,c.yiqixinghao)
@@ -232,7 +249,7 @@ function genJiaozhunO(c,fn){
 // def genJiaozhunN(c,fn):
 //     tree = ET.parse(fn)
 //     root = tree.getroot()
-//     Worksheets=root.findall("{urn:schemas-microsoft-com:office:spreadsheet}Worksheet")  
+//     Worksheets=root.findall("{urn:schemas-microsoft-com:office:spreadsheet}Worksheet")
 //     Worksheet = Worksheets[0]
 //     table=Worksheet.find("{urn:schemas-microsoft-com:office:spreadsheet}Table")
 //     setCell(table,10,8,c.yiqixinghao)
@@ -288,7 +305,7 @@ function genJiaozhunO(c,fn){
 // def genJiaozhunON(c,fn):
 //     tree = ET.parse(fn)
 //     root = tree.getroot()
-//     Worksheets=root.findall("{urn:schemas-microsoft-com:office:spreadsheet}Worksheet")  
+//     Worksheets=root.findall("{urn:schemas-microsoft-com:office:spreadsheet}Worksheet")
 //     Worksheet = Worksheets[0]
 //     table=Worksheet.find("{urn:schemas-microsoft-com:office:spreadsheet}Table")
 //     setCell(table,10,8,c.yiqixinghao)// setCell(table,11,8).Value =c.yiqixinghao
@@ -348,10 +365,10 @@ function genJiaozhunO(c,fn){
 //     //data=s.read()
 //     //data=data.decode('utf-8')
 //     return s//data
-// def genJiaozhunCS(c,fn):  
+// def genJiaozhunCS(c,fn):
 //     tree = ET.parse(fn)
 //     root = tree.getroot()
-//     Worksheets=root.findall("{urn:schemas-microsoft-com:office:spreadsheet}Worksheet")  
+//     Worksheets=root.findall("{urn:schemas-microsoft-com:office:spreadsheet}Worksheet")
 //     Worksheet = Worksheets[0]
 //     table=Worksheet.find("{urn:schemas-microsoft-com:office:spreadsheet}Table")
 //     setCell(table,10,8,c.yiqixinghao)//setCell(table,10,8).Value =c.yiqixinghao
@@ -439,14 +456,14 @@ function genJiaozhunO(c,fn){
 //         setCell(table,5,6,getCell(table,5,6)+"√")//setCell(table,5,6).Value =setCell(table,5,6).Value     +"√"
 //         setCell(table,11,3,"√")//setCell(table,11,3).Value ="√"
 //         setCell(table,11,5,"√")//setCell(table,11,5).Value ="√"
-//     setCell(table,2,6,"合同号："+c.hetongbh)//setCell(table,2,6).Value ="合同号："+c.hetongbh    
+//     setCell(table,2,6,"合同号："+c.hetongbh)//setCell(table,2,6).Value ="合同号："+c.hetongbh
 //     setCell(table,6,3,c.yiqibh) //setCell(table,6,3).Value =c.yiqibh
 //     setCell(table,3,3,c.yonghu) //setCell(table,3,3).Value =c.yonghu
 //     d=datetime.datetime.now()
 //     setCell(table,13,4,str(d.year)+"年") //setCell(table,13,4).FormulaR1C1 =str(d.year)+"年"
 //     setCell(table,13,5,str(d.month)+"月")//setCell(table,13,5).Value =str(d.month)+"月"
-//     setCell(table,13,6,str(d.day)+"日")//setCell(table,13,6).Value =str(d.day)+"日"    
-//     setCell(table,14,3,c.baoxiang)//setCell(table,13,6).Value =str(d.day)+"日"    
+//     setCell(table,13,6,str(d.day)+"日")//setCell(table,13,6).Value =str(d.day)+"日"
+//     setCell(table,14,3,c.baoxiang)//setCell(table,13,6).Value =str(d.day)+"日"
 //     s=BytesIO()
 //     tree.write(s, encoding="utf-8", xml_declaration=True, method="xml")
 //     s.seek(0)
@@ -456,7 +473,7 @@ function genJiaozhunO(c,fn){
 // def genJiaozhunONH(c,fn):
 //     tree = ET.parse(fn)
 //     root = tree.getroot()
-//     Worksheets=root.findall("{urn:schemas-microsoft-com:office:spreadsheet}Worksheet")  
+//     Worksheets=root.findall("{urn:schemas-microsoft-com:office:spreadsheet}Worksheet")
 //     Worksheet = Worksheets[0]
 //     table=Worksheet.find("{urn:schemas-microsoft-com:office:spreadsheet}Table")
 //     setCell(table,10,8,c.yiqixinghao)// setCell(table,11,8).Value =c.yiqixinghao
@@ -518,48 +535,54 @@ function genJiaozhunO(c,fn){
 //     return data
 // if __name__=="__main__":
 //     print(genPack("4111533499"))
-function getJiaoZhunFile(c){
-    var rt=c.yiqixinghao.split("-")
-    var lx=rt[0];
-    var tmp=rt[1];
-    var MEDIA_ROOT=".";
-    console.log(lx);
-    data=null;
-    if(lx=="O"){
-        tname="O模板"
-        fullfilepath = path.join(MEDIA_ROOT,"t_"+tname+".xml")
-        console.info(fullfilepath)
-        var data=genJiaozhunO(c,fullfilepath)
-        return data;
-    }
-    // if(lx=="N"){
-    //     tname="N模板"
-    //     fullfilepath = os.path.join(MEDIA_ROOT,"t_"+tname+".xml")
-    //     logging.info(fullfilepath)
-    //     data=genJiaozhunN(c,fullfilepath)
-    //     return data;
-    // }
-    // elif lx==u"ON":
-    //     tname="ON模板"
-    //     fullfilepath = os.path.join(MEDIA_ROOT,"t_"+tname+".xml")
-    //     logging.info(fullfilepath)
-    //     data=genJiaozhunON(c,fullfilepath)
-    // elif lx==u"OH":
-    //     tname="OH模板"
-    //     fullfilepath = os.path.join(MEDIA_ROOT,"t_"+tname+".xml")
-    //     logging.info(fullfilepath)
-    //     data=genJiaozhunOH(c,fullfilepath)
-    // elif lx==u"ONH":
-    //     tname="ONH模板"
-    //     fullfilepath = os.path.join(MEDIA_ROOT,"t_"+tname+".xml")
-    //     logging.info(fullfilepath)
-    //     data=genJiaozhunONH(c,fullfilepath)
-    // else:
-    //     tname="CS模板"//"aveSingle2"
-    //     fullfilepath = os.path.join(MEDIA_ROOT,"t_"+tname+".xml")
-    //     logging.info(fullfilepath)
-    //     data=genJiaozhunCS(c,fullfilepath)
-    // return data
+function getJiaoZhunFile(c) {
+  var rt = c.yiqixinghao.split('-');
+  var lx = rt[0];
+  var tmp = rt[1];
+  var MEDIA_ROOT = '.';
+  console.log(lx);
+  data = null;
+  if (lx == 'O') {
+    tname = 'O模板';
+    fullfilepath = path.join(MEDIA_ROOT, 't_' + tname + '.xml');
+    console.info(fullfilepath);
+    var data = genJiaozhunO(c, fullfilepath);
+    return data;
+  }
+  // if(lx=="N"){
+  //     tname="N模板"
+  //     fullfilepath = os.path.join(MEDIA_ROOT,"t_"+tname+".xml")
+  //     logging.info(fullfilepath)
+  //     data=genJiaozhunN(c,fullfilepath)
+  //     return data;
+  // }
+  // elif lx==u"ON":
+  //     tname="ON模板"
+  //     fullfilepath = os.path.join(MEDIA_ROOT,"t_"+tname+".xml")
+  //     logging.info(fullfilepath)
+  //     data=genJiaozhunON(c,fullfilepath)
+  // elif lx==u"OH":
+  //     tname="OH模板"
+  //     fullfilepath = os.path.join(MEDIA_ROOT,"t_"+tname+".xml")
+  //     logging.info(fullfilepath)
+  //     data=genJiaozhunOH(c,fullfilepath)
+  // elif lx==u"ONH":
+  //     tname="ONH模板"
+  //     fullfilepath = os.path.join(MEDIA_ROOT,"t_"+tname+".xml")
+  //     logging.info(fullfilepath)
+  //     data=genJiaozhunONH(c,fullfilepath)
+  // else:
+  //     tname="CS模板"//"aveSingle2"
+  //     fullfilepath = os.path.join(MEDIA_ROOT,"t_"+tname+".xml")
+  //     logging.info(fullfilepath)
+  //     data=genJiaozhunCS(c,fullfilepath)
+  // return data
 }
-var c={yiqixinghao:"O-3000",yiqibh:"11111111",yonghu:"yonghu",addr:"addr",yujifahuo_date:Date()};
-getJiaoZhunFile(c)
+var c = {
+  yiqixinghao: 'O-3000',
+  yiqibh: '11111111',
+  yonghu: 'yonghu',
+  addr: 'addr',
+  yujifahuo_date: Date(),
+};
+getJiaoZhunFile(c);

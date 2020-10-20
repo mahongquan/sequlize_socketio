@@ -1,8 +1,6 @@
 import React from 'react';
-import {ContextMenuTrigger,ContextMenu,MenuItem} from "react-contextmenu"
-import {
-  Button,
-} from "react-bootstrap";
+import { ContextMenuTrigger, ContextMenu, MenuItem } from './contextmenu2';
+import { Button } from 'react-bootstrap';
 
 class File extends React.Component {
   glyphClass = () => {
@@ -11,7 +9,7 @@ class File extends React.Component {
     return className;
   };
 
-  remove = (path) => {
+  remove = path => {
     this.props.socket.emit('/fs/remove', { path: path }, () => {
       this.props.browser.reloadFilesFromServer();
     });
