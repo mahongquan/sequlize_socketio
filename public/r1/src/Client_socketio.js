@@ -1,8 +1,15 @@
 import queryString from 'querystring';
-var _ = require('lodash');
 import io from 'socket.io-client';
-const HOST = 'http://localhost:8000';
-var socket = io.connect(HOST);
+var _ = require('lodash');
+let host = '';
+let socket;
+if (window.require) {
+  host = 'http://127.0.0.1:8000';
+  socket = io.connect(host);
+}
+else{
+  socket=io();
+}
 function get(url, data, cb, err_callback) {
   console.log(url);
   console.log(data);
@@ -69,28 +76,28 @@ function logout(cb) {
 }
 
 function login(username, password, cb) {
-  login_index(res => {
-    // csrftoken=res.csrf_token;
-    var payload = {
-      username: username,
-      password: password,
-    };
-    var body = queryString.stringify(payload);
-    // return myFetch("POST","/rest/login",body,cb, {'Content-Type':'application/x-www-form-urlencoded'})
-    let url = host + '/rest/login';
-    axios
-      .post(url, body, {
-        xsrfCookieName: 'XSRF-TOKEN', // default
-        xsrfHeaderName: 'X-XSRF-TOKEN', // d
-        headers: { 'content-type': 'application/x-www-form-urlencoded' },
-      })
-      .then(checkStatus)
-      .then(parseJSON)
-      .then(cb)
-      .catch(error => {
-        alert(error + '\n请检查服务器/刷新网页/登录');
-      });
-  });
+  // login_index(res => {
+  //   // csrftoken=res.csrf_token;
+  //   var payload = {
+  //     username: username,
+  //     password: password,
+  //   };
+  //   var body = queryString.stringify(payload);
+  //   // return myFetch("POST","/rest/login",body,cb, {'Content-Type':'application/x-www-form-urlencoded'})
+  //   let url = host + '/rest/login';
+  //   axios
+  //     .post(url, body, {
+  //       xsrfCookieName: 'XSRF-TOKEN', // default
+  //       xsrfHeaderName: 'X-XSRF-TOKEN', // d
+  //       headers: { 'content-type': 'application/x-www-form-urlencoded' },
+  //     })
+  //     .then(checkStatus)
+  //     .then(parseJSON)
+  //     .then(cb)
+  //     .catch(error => {
+  //       alert(error + '\n请检查服务器/刷新网页/登录');
+  //     });
+  // });
 }
 
 function checkStatus(response) {
