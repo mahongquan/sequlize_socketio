@@ -1,40 +1,93 @@
 {
-  "name": "sequlize_socketio",
-  "version": "0.1.0",
+  "name": "react-parts",
+  "version": "0.2.1",
+  "license": "",
   "private": true,
   "proxy": "http://localhost:8000/",
   "homepage": ".",
-  "scripts": {
-    "start": "react-scripts start",
-    "build": "react-scripts build"
-  },
+  "main": "main.js",
   "dependencies": {
-    "bootstrap":"latest",
+    "@babel/core": "latest",
+    "@babel/helper-call-delegate": "latest",
+    "@babel/plugin-proposal-class-properties": "latest",
+    "@babel/plugin-proposal-decorators": "latest",
+    "@babel/plugin-proposal-do-expressions": "latest",
+    "@babel/plugin-proposal-export-default-from": "latest",
+    "@babel/plugin-proposal-export-namespace-from": "latest",
+    "@babel/plugin-proposal-logical-assignment-operators": "latest",
+    "@babel/plugin-proposal-nullish-coalescing-operator": "latest",
+    "@babel/plugin-proposal-optional-chaining": "latest",
+    "@babel/plugin-proposal-pipeline-operator": "latest",
+    "@babel/plugin-syntax-jsx": "latest",
+    "@babel/plugin-transform-flow-strip-types": "latest",
+    "@babel/plugin-transform-react-display-name": "latest",
+    "@babel/plugin-transform-react-jsx": "latest",
+    "@babel/plugin-transform-react-jsx-self": "latest",
+    "@babel/plugin-transform-react-jsx-source": "latest",
+    "@babel/plugin-transform-typescript": "latest",
+    "@babel/polyfill": "latest",
+    "@babel/preset-env": "latest",
+    "@babel/preset-react": "latest",
+    "@babel/preset-typescript": "latest",
+    "@date-io/moment": "latest",
+    "@fortawesome/fontawesome-svg-core": "latest",
+    "@fortawesome/free-solid-svg-icons": "latest",
+    "@fortawesome/react-fontawesome": "latest",
+    "@material-ui/core": "latest",
+    "@material-ui/icons": "latest",
+    "@material-ui/pickers": "latest",
+    "bootstrap": "latest",
     "chart.js": "latest",
-    "chartjs": "latest",
+    "electron": "^11.1.0",
+    "history": "latest",
     "immutability-helper": "latest",
-    "lodash.find": "latest",
-    "lodash.isequal":"latest",
-    "mime": "latest",
+    "levenary": "^1.1.1",
+    "lodash": "latest",
     "moment": "latest",
+    "moment-timezone": "latest",
     "prop-types": "latest",
+    "querystring": "latest",
     "react": "latest",
     "react-autosuggest": "latest",
-    "react-bootstrap":"latest",
+    "react-bootstrap": "latest",
     "react-chartjs-2": "latest",
-    "react-contextmenu": "latest",
     "react-datetime": "latest",
     "react-dom": "latest",
-    "react-scripts":"latest",
-    "socket.io-client": "latest",
-    "socket.io-stream": "latest",
-    "typescript":"latest"
+    "react-redux": "latest",
+    "react-router-dom": "latest",
+    "react-rte": "latest",
+    "react-scripts": "latest",
+    "react-select": "latest",
+    "recharts": "latest",
+    "redux": "latest",
+    "redux-thunk": "latest",
+    "socket.io-client": "^3.0.4",
+    "socket.io-stream": "^0.9.1",
+    "trim-right": "latest",
+    "typescript": "latest"
   },
-  "devDependencies": {},
-  "browserslist": [
-    ">0.2%",
-    "not dead",
-    "not ie <= 11",
-    "not op_mini all"
-  ]
+  "scripts": {
+    "start": "react-scripts start",
+    "build": "react-scripts build",
+    "test": "react-scripts test",
+    "eject": "react-scripts eject"
+  },
+  "eslintConfig": {
+    "extends": [
+      "react-app",
+      "react-app/jest"
+    ]
+  },
+  "browserslist": {
+    "production": [
+      ">0.2%",
+      "not dead",
+      "not op_mini all"
+    ],
+    "development": [
+      "last 1 chrome version",
+      "last 1 firefox version",
+      "last 1 safari version"
+    ]
+  }
 }
