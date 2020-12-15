@@ -16,11 +16,10 @@ import AppBar from '@material-ui/core/AppBar';
 import Typography from '@material-ui/core/Typography';
 import RichTextEditor from 'react-rte';
 import { withStyles } from '@material-ui/core/styles';
-// var _ = require('lodash');
+import Datetime from 'react-datetime';
 var moment = require('moment');
 // eslint-disable-next-line
 var locale = require('moment/locale/zh-cn');
-var DateTime = require('react-datetime');
 const styles = {
   appBar: {
     position: 'relative',
@@ -520,7 +519,7 @@ class ContactEdit2New extends Component {
                   <label>入库时间:</label>
                 </td>
                 <td>
-                  <DateTime
+                  <Datetime
                     ref="datetime1"
                     timeFormat={false}
                     inputProps={{
@@ -534,7 +533,7 @@ class ContactEdit2New extends Component {
                 </td>
                 <td>调试时间:</td>
                 <td>
-                  <DateTime
+                  <Datetime
                     ref="datetime2"
                     timeFormat={false}
                     inputProps={{

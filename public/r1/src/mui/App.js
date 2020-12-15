@@ -51,14 +51,14 @@ const styles = theme => ({
     overflowX: 'auto',
   },
   inputRoot: {
-    color: 'inherit',
+    color: 'primary',
     width: '132px',
   },
   inputInput: {
-    paddingTop: theme.spacing.unit,
+    paddingTop: theme.spacing(1),
     paddingRight: 0,
-    paddingBottom: theme.spacing.unit,
-    paddingLeft: theme.spacing.unit,
+    paddingBottom: theme.spacing(1),
+    paddingLeft:theme.spacing(1),
     transition: theme.transitions.create('width'),
     width: '100%',
     [theme.breakpoints.up('sm')]: {
@@ -504,18 +504,18 @@ class App extends Component {
           <Toolbar>
             <Typography
               variant="h6"
-              color="inherit"
+              color="primary"
               className={this.props.classes.grow}
             >
               装箱单
             </Typography>
-            <Button color="inherit" onClick={this.openDlgPacks}>
+            <Button color="primary" onClick={this.openDlgPacks}>
               包
             </Button>
-            <Button color="inherit" onClick={this.openDlgItems}>
+            <Button color="primary" onClick={this.openDlgItems}>
               备件
             </Button>
-            <Button color="inherit" onClick={this.openDlgCopyPack}>
+            <Button color="primary" onClick={this.openDlgCopyPack}>
               复制包
             </Button>
             <DropdownButton title="统计">
@@ -545,7 +545,7 @@ class App extends Component {
             </DropdownButton>
 
             <InputBase
-              color="inherit"
+              color="primary"
               onKeyPress={this.keypress}
               value={this.state.search}
               placeholder="合同/仪器编号/客户"
@@ -555,11 +555,11 @@ class App extends Component {
               }}
               onChange={this.handleSearchChange}
             />
-            <Button color="inherit" onClick={this.search}>
+            <Button color="primary" onClick={this.search}>
               <SearchIcon />
             </Button>
             <Button
-              color="inherit"
+              color="primary"
               style={{ margin: '0px 10px 0px 10px' }}
               variant="contained"
               onClick={() => this.handleEdit(null)}
@@ -567,14 +567,14 @@ class App extends Component {
               新仪器
             </Button>
             <Button
-              color="inherit"
+              color="primary"
               variant="contained"
               onClick={this.openDlgImport}
             >
               导入标样
             </Button>
             <Button
-              color="inherit"
+              color="primary"
               style={{ margin: '0px 10px 0px 10px', display: 'none' }}
               onClick={this.openDlgImportHT}
             >
