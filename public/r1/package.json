@@ -29,6 +29,7 @@
     "@babel/preset-env": "latest",
     "@babel/preset-react": "latest",
     "@babel/preset-typescript": "latest",
+    "@babel/register": "latest",
     "@date-io/moment": "latest",
     "@fortawesome/fontawesome-svg-core": "latest",
     "@fortawesome/free-solid-svg-icons": "latest",
