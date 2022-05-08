@@ -1,12 +1,12 @@
 #!/usr/bin/env node
+var path = require('path');
 var exec = require('child_process').exec;
 //var readStandardFile=require('./readstandard')
 var static = require('./node-static');
-var file = new static.Server('./public');
+var file = new static.Server(path.resolve(__dirname)+'/public');
 var debug = require('debug')('express-example');
 var models = require('./models');
 var ss = require('socket.io-stream');
-var path = require('path');
 var fs = require('fs');
 const { StringDecoder } = require('string_decoder');
 const decoder = new StringDecoder('utf8');

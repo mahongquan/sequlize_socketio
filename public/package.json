@@ -1,0 +1,68 @@
+{
+  "name": "react-parts",
+  "version": "0.2.2",
+  "license": "",
+  "private": true,
+  "proxy": "http://localhost:8000/",
+  "homepage": ".",
+  "main": "main.js",
+  "dependencies": {
+    "@date-io/moment": "latest",
+    "@emotion/react": "latest",
+    "@emotion/styled": "latest",
+    "@mui/icons-material": "latest",
+    "@mui/lab": "latest",
+    "@mui/material": "latest",
+    "@mui/styles": "latest",
+    "@reduxjs/toolkit": "^1.8.1",
+    "@vitejs/plugin-react-refresh": "latest",
+    "bootstrap": "latest",
+    "classnames": "latest",
+    "easymde": "latest",
+    "immutability-helper": "latest",
+    "lodash": "latest",
+    "moment": "latest",
+    "moment-timezone": "latest",
+    "prop-types": "latest",
+    "react": "latest",
+    "react-autosuggest": "latest",
+    "react-bootstrap": "latest",
+    "react-datetime": "latest",
+    "react-dom": "latest",
+    "react-redux": "latest",
+    "react-router-dom": "latest",
+    "react-rte": "latest",
+    "react-scripts": "latest",
+    "react-select": "latest",
+    "react-simplemde-editor": "latest",
+    "recharts": "latest",
+    "redux": "latest",
+    "redux-thunk": "latest",
+    "socket.io-client": "latest",
+    "vite": "latest"
+  },
+  "scripts": {
+    "vite": "vite",
+    "vb": "vite build",
+    "local": "electron . --dev",
+    "e": "esbuild --log-level=warning  --target=chrome88  --sourcemap --bundle --watch src/index_es.jsx --outfile=esbuild/main.js --loader:.js=jsx",
+    "h": "esbuild --help",
+    "v": "esbuild --version",
+    "start": "react-scripts start",
+    "build": "react-scripts build",
+    "test": "react-scripts test",
+    "eject": "react-scripts eject"
+  },
+  "browserslist": {
+    "production": [
+      ">0.2%",
+      "not dead",
+      "not op_mini all"
+    ],
+    "development": [
+      "last 1 chrome version",
+      "last 1 firefox version",
+      "last 1 safari version"
+    ]
+  }
+}
